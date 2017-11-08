@@ -10,11 +10,10 @@ import threading
 import random
 import os
 
-print ("boice timer active")
-print (datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-print ("\n")
+import jtalk
+import filer
 
-audio_url = "./etcs/Audio/"
+AUDIO_URL = "../etcs/Audio/"
 
 a = datetime.now()
 
@@ -58,40 +57,63 @@ def voice_timer():
     global a
     b = datetime.now()
     # 実質使われるのは10,20,30,40,50のデータのみ
-    if(b.minute%10 == 0):
     # 10 分ごとの時報
+    if(b.minute%10 == 0):
     # TODO wavファイルがないときは例外を投げる
-        audio_func( audio_url + "Init/master.wav")
-        h_url = audio_url + str(b.hour%12) + "zi.wav"
-        audio_func(h_url)
-        m_url = audio_url + str(b.minute) + "m.wav"
-        audio_func(m_url)
+        audio_func( AUDIO_URL + "Init/master.wav")
+        say_text = str(b.hour%12) + '時' + str(b.minute) + "分です"
+        jtalk.jtalk(say_text)
     else:
     # なにもない時のリアクション
         # 1 ~ 100 の整数値をランダムに生成
         rand_int = random.randint(1,100)
-        if 1 < b.hour and b.hour < 5 : # b.hour が0~24の時のプログラム
-            # 夜の場合の一般リアクション
-            if (rand_int % 3 == 0): # 0を割り算するとエラーが起こる可能性を考慮
-                url = audio_url + "other/yoru" + str(random.randint(1,3)) + ".wav"
+        if 1 <= b.hour and b.hour <=4 :
+            # 真夜中の場合の一般リアクション
+            # 0を割り算するとエラーが起こる可能性を考慮 
+            if (rand_int % 3 == 0): 
+                url = AUDIO_URL + "other/midnight"
+                url = filer.GetFileName(url)
+                audio_func(url)
+        elif 18 <= b.hour :
+            # 夕方から夜にかけての場合の一般リアクション
+            if (rand_int % 5 == 0):
+                url = AUDIO_URL + "other/evening"
+                url = filer.GetFileName(url)
+                audio_func(url)
+        elif 5 <= b.hour and b.hour <= 9 :
+            # 朝の場合の一般リアクション
+            if (rand_int % 5 == 0):
+                url = AUDIO_URL + "other/morning"
+                url = filer.GetFileName(url)
                 audio_func(url)
         else:
             # 昼の場合の一般リアクション
-            if (rand_int % 5 == 0):
-                #url = audio_url + "other/hiru" + str(random.randint(1,1)) + ".wav"
-                #audio_func(url)
+            if (rand_int % 6 == 0):
+                url = AUDIO_URL + "other/daytime"
+                url = filer.GetFileName(url)
+                audio_func(url)
     # 呼び出された後の処理
-    print ("h:" + b.hour + " m:" + b.minute + " s:" + b.second)
     a = datetime.now()
     # 指定秒に呼び出されるようにスレッドをセットする
     t=threading.Timer(60,voice_timer)
     t.start()
-# main function
-# TODO カレントディレクトリの問題か？
-print(os.getcwd())
-# absolute_file_path =
-url = audio_url + "Init/init_voice.wav"
-audio_func(url)
 
-t=threading.Timer(1,voice_timer)
-t.start()
+# main function
+def main():
+    print ("boice timer active")
+    print (datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+    print (os.getcwd())
+    print ("\n")
+
+    url = AUDIO_URL + "Init/init_voice.wav"
+    audio_func(url)
+
+    b = datetime.now()
+    say_text = str(b.hour%12) + '時' + str(b.minute) + "分です"
+    jtalk.jtalk(say_text)
+
+    t=threading.Timer(1,voice_timer)
+    t.start()
+
+if __name__=="__main__":
+    main()
