@@ -7,30 +7,8 @@ import main
 import audio
 import jtalk
 import filer
-# 祝日などの通知したい日のデータと通知するときのテキスト
-json_list = [\
-    {'month':1,'day':1,'what':'お正月',\
-        'voice':''},\
-    {'month':2,'day':3,'what':'節分',\
-        'voice':''},\
-    {'month':2,'day':11,'what':'建国記念の日',\
-        'voice':''},\
-    {'month':2,'day':14,'what':'バレンタインデー',\
-        'voice':''},\
-    {'month':3,'day':3,'what':'ひな祭り',\
-        'voice':''},\
-    {'month':3,'day':14,'what':'ホワイトデー',\
-        'voice':''},\
-    {'month':4,'day':1,'what':'エイプリルフール',\
-        'voice':''},\
-    {'month':4,'day':29,'what':'昭和の日',\
-        'voice':''},\
-    {'month':,'day':,'what':'',\
-        'voice':''},\
-    
-    {'month':11,'day':21,'what':'私の誕生日',\
-        'voice':'祝ってくれてありがとー！'},\
-]
+import day_list
+
 now = datetime.now()
 def clock():
     global now
@@ -40,7 +18,7 @@ def clock():
 
     if(now.minute%10 == 0):
         time_signal()
-    elif random.randint(0,60) == 0:
+    elif random.randint(0,20) == 0:
         # 60分に一回程度で特殊日時ボイスを出します
         specific_time()
     else:
@@ -55,7 +33,6 @@ def clock():
 def specific_time():
 # 行事などがあったときのつぶやき
     global now
-    global json_list
 
     '''
     if (now.month in json_list) == True:
@@ -64,7 +41,7 @@ def specific_time():
     '''
 # pythonならもっとここを綺麗に書けるのでは？
 # 今日が何の日なのかと、設定されていたテキストを読み上げる
-    for j in json_list:
+    for j in day_list.json_list:
         if j["month"] == now.month:
             if j["day"] == now.day:
                 say_text = "今日は" + j["what"] + "です"
