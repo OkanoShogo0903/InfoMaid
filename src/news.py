@@ -1,43 +1,76 @@
-import requests
-from bs4 import BeautifulSoup
-#news_list
-def NewsMaster():
-    news_url = SelectNews()
-    GetNewsList(news_url)
-    GetNewsText()
-def SelectNews():
-    url = 'https://news.finance.yahoo.co.jp/'
-#    url = 'https://news.yahoo.co.jp/pickup/economy/rss.xml'
-#    url = 'https://rdsig.yahoo.co.jp/rss/l/headlines/sci/it_nlab/RV=1/RU=aHR0cHM6Ly9oZWFkbGluZXMueWFob28uY28uanAvaGw_YT0yMDE3MTEyNC0wMDAwMDA3My1pdF9ubGFiLXNjaQ--'
-    return url
-def GetNewsText():
-    pass
-def GetNewsList(url_):
-    res = requests.get(url_)
+import time
+import threading
+import beautiful_soup
+import rss
+news_list = []
+site_list = [\
+    {
+        'RSS_URL':
+            'https://headlines.yahoo.co.jp/rss/it_nlab-c_sci.xml',
+        'TEXT_POS':[
+            'p','class','ynDetailText'
+        ],
+    },
+]
+class NewsData:
+    """News infomation class"""
+    def __init__(self,site_):
+        # RSSのURLと記事があるサイト
+        self.RSS_URL = site_['RSS_URL']
+        # 記事の位置（手動で探してsite_listに書いたやつ）
+        self.TEXT_POS = site_['TEXT_POS']
 
-    # print(res.text)
-    soup = BeautifulSoup(res.text, 'lxml') #要素を抽出
-#    print(soup.text)
+        self.SITE_NAME = ""
+        
+        # RSS自体のタイトルを取得
+        self.RSS_TITLE = rss.get_rss_title(self.RSS_URL)
 
-    explains = soup.find_all("li", {"class": "ymuiArrow1"})
-#    explains = soup.find_all("p", {"class": "ynDetailText"})
+        # RSSから各記事のタイトルとURLを取得
+        self.topic_list = rss.get_rss_topic(self.RSS_URL)
+        
+        # 記事があるURLを手に入れる
+        for topic in self.topic_list:
+            topic["text"] = beautiful_soup.get_news_text( topic["link"], self.TEXT_POS)
 
-    news_list = []
-    for explain in explains:
-        # 新しく追加する辞書を構成する
-#        dict_ = {}
-        dict_ = {"title":"","text":"","genre":"","link":""}
-        dict_["title"] = explain.text.replace("\xa0","")
-        dict_["text"] = ""
-        news_list.append(dict_)
-        #print(dict_)
+    def print_all_topic(self):
+        print("---------------------------------------------------")
+        for topic in self.topic_list:
+            print("title:" + topic["title"])
+            print("link :" + topic["link"])
+            print("cate :" + topic["category"])
+            a = topic["text"]
+            print("text :" + a[:50])
+#            print("text :" + topic["text"])
+        print("---------------------------------------------------")
 
-    # 入手したデータを画面に出力
-    for tmp in news_list:
-        print("title:" + tmp["title"])
-        print("genre:" + tmp["genre"])
-        print("link :" + tmp["link"])
-        print("text :" + tmp["text"])
+    def __str__(self):
+        res =       " RSS_URL  : " + self.RSS_URL + "\r\n"
+        res = res + " TEXT_POS : " + (str)(self.TEXT_POS)
+        return res
+
+def news_init():
+    global news_list
+# threads start
+    data_renew()
+
+    for news in news_list:
+        news.print_all_topic()
+    print(len(news_list))
+    
+#    t=threading.Timer(1,data_renew)
+def data_renew():
+    global news_list
+    renew_data_list = []
+    for site in site_list:
+        tmp = NewsData(site)
+#        tmp.print_all_topic()
+#        print (tmp)
+        renew_data_list.append(tmp)
+
+    news_list = renew_data_list
+
+# 一時間ごとにデータを更新するために１時間後に呼び出す
+#    t=threading.Timer(60*60,data_renew)
 
 if __name__=="__main__":
-    NewsMaster()
+    news_init()
