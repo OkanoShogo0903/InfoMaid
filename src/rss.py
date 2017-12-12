@@ -29,36 +29,27 @@ def get_rss_topic(rss_url_):
     topic_list = []
     for entry in range(len(feed.entries)):
         # RSSの内容を一件づつ処理する
+        # published_datetime等は世界時間になっているため、日本時間には+9時間すること
+        # 最新の記事から順に取得される
         # TODO titleでかっことその中身を消す
-        title = feed.entries[entry].title
-        link = feed.entries[entry].link
-        try:
-            category = feed.entries[entry].category
-        except AttributeError:
-            pass
 
         # 更新日を文字列として取得
         published_string = feed.entries[entry].published
-
         # 更新日をdatetimeとして取得
         tmp = feed.entries[entry].published_parsed
         published_datetime = datetime.fromtimestamp(mktime(tmp))
-
-        # 表示
-        '''
-        print (title)
-        print (link)
-        print (published_string)
-        print (published_datetime)
-        '''
+        # 日本時間に変換
+#        jp_datetime = published_datetime + datetime.timedelta(hours=9)
 
         # 新しく追加する辞書を構成する
-        dict_ = {}
-        dict_ = {"title":"","text":"","link":"","category":""}
-        dict_["title"] = title
-        dict_["link"] = link
+        dict_ = {"title":"","text":"","link":"","category":"","published_string":"","published_datetime":""}
+        dict_["title"] = feed.entries[entry].title
+        dict_["link"] = feed.entries[entry].link
+        dict_["published_string"] = published_string
+        dict_["published_datetime"] = published_datetime
+        # categoryがない場合はエラーを吐くので、その対応
         try:
-            dict_["category"] = category
+            dict_["category"] = feed.entries[entry].category
         except:
             pass
         topic_list.append(dict_)

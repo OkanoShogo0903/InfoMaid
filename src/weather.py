@@ -1,59 +1,91 @@
-#from requests_oauthlib import OAuth1Session
-#import sys
-#sys.path.append("C:\\Users\\okano\\Anaconda3\\Lib\\site-packages")
-#from datetime import datetime
-#import locale
-#import time
-#import threading
+import time
+import threading
 import json
 import requests
 from bs4 import BeautifulSoup
 import jtalk
 
-def SayWeather():
-# 内容：天気と気温を読み上げる
-# TODO 語尾や言い方にバリエーションを持たせるような造り込みがあるとおもしろい
-    jtalk.jtalk("今日の天気をお伝えします")
-    list_ = WeatherFunc()
-    jtalk.jtalk("今日の天気は" + list_[0])
-    if list_[1] != "不明":
-        jtalk.jtalk("最高気温は" + list_[1] + "度")
-    else:
-        jtalk.jtalk("最高気温は" + list_[1] + "です")
+class WeatherData:
+    """ class of weather data and functions """
+    def __init__(self):
+        # シングルトンで書くと綺麗では？？
+        # 天気データの取得
+        self.get_weather_data()
+
+
+    def say(self,say_range):
+    # 内容：天気と気温を読み上げる
+    # TODO 語尾や言い方にバリエーションを持たせるような造り込みがあるとおもしろい
         
-    if list_[2] != "不明":
-        jtalk.jtalk("最低気温は" + list_[2] + "度")
-    else:
-        jtalk.jtalk("最低気温は" + list_[2] + "です")
-def WeatherFunc():
-# 内容：天気に関するデータをweatherhackのAPIから手に入れる
-    # jsonデータを取ってくる
-    url = "http://weather.livedoor.com/forecast/webservice/json/v1?city=170010"
-    resp = requests.get(url)
-    # print(resp.text)
+        jtalk.jtalk("本日の" + self.city + "の天気をお伝えします")
 
-    json_dict = json.loads(resp.text)
+        # 天気情報はスラスラ読み上げた方が秘書っぽい感じがしていいので、連続して読み上げさせる
+        try:
+            say_text = ""
+            for data in self.forecasts[:say_range]:
+                # 「~最低気温不明、明日の~」の、『、』をつけるための処理
+                # say_textになにかが入っていたら、をつける
+                if say_text:
+                    say_text += "、"
+                say_text += data['dateLabel'] + "の天気は"
+                try:
+                    say_text += "最高気温" + data['temperature']['max']['celsius'] + "度、"
+                except TypeError:
+                    # 気温がnullだったときは例外処理
+                    say_text += "最高気温不明、"
 
-    telop = json_dict['forecasts'][0]['telop']
+                try:
+                    say_text += "最低気温" + data['temperature']['min']['celsius'] + "度"
+                except TypeError:
+                    # 気温がnullだったときは例外処理
+                    say_text += "最低気温不明"
+            else:
+                say_text += "です"
+                jtalk.jtalk(say_text)
+        except:
+            err_txt = "天気についてのエラーが発生しています"
+            print(err_txt)
+            jtalk.jtalk(err_txt)
+            
+#        jtalk.jtalk(self.description)
+    def get_weather_data(self):
+    # 内容：天気に関するデータをweatherhackのAPIから手に入れる
+        print("get_weather_data : start")
+        # jsonデータを取ってくる
+        url = "http://weather.livedoor.com/forecast/webservice/json/v1?city=170010"
+        resp = requests.get(url)
+        # print(resp.text)
 
-    try:
-        tem_max = json_dict['forecasts'][0]['temperature']['max']['celsius']
-        tem_max += '°'
-    except TypeError:
-        tem_max = "不明"
+        json_dict = json.loads(resp.text)
 
-    try:
-        tem_min = json_dict['forecasts'][0]['temperature']['min']['celsius']
-        tem_min += '°'
-    except TypeError:
-        tem_min = "不明"
+        # 元データを保存しておく(使わないかも)
+        self.origin_dict = json_dict
 
-    output = [telop,tem_max,tem_min]
-#    out_str = "天気 : " + telop + "\n" + "最高気温 : " + tem_max + "\n" + "最低気温 : " + tem_min
-#    out_str = "天気は" + telop + "最高気温は" + tem_max + "最低気温は" + tem_min
+        # 今日、明日、明後日のデータを使いやすく取っておく
+        self.area = json_dict['location']['area']
+        self.pref = json_dict['location']['prefecture']
+        self.city = json_dict['location']['city']
 
-    return output
+        self.title = json_dict['title']
+        self.link = json_dict['link']
+        self.publicTime = json_dict['publicTime']
 
+        self.description = json_dict['description']['text']
+        self.descPublicTime = json_dict['description']['publicTime']
+
+        self.forecasts = json_dict['forecasts']
+
+        # コピーライトについて
+        print("@copyright")
+        print(json_dict['copyright']['title'])
+        print(json_dict['copyright']['provider'])
+
+        # 一時間ごとにデータを更新するために１時間後に呼び出す
+        t=threading.Timer(60*60,self.get_weather_data)
+        print("get_weather_data : end")
+        print()
+#------------------------------------------------------
+# 外から呼び出される部分
 if __name__=="__main__":
-#    jtalk.jtalk(WeatherFunc())
-    SayWeather()
+    weather = WeatherData()
+    weather.say(1)
