@@ -12,14 +12,14 @@ import audio
 import clock_func
 import jtalk
 import filer
-
+import weather
 AUDIO_URL = "../etcs/Audio/"
 
 a = datetime.now()
-
+wea = weather.WeatherData()
 # main function
 def main():
-    if 1:
+    if 0:
         print ("boice timer active")
         print (datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
         print (os.getcwd())
@@ -28,14 +28,17 @@ def main():
         url = AUDIO_URL + "Init/init_voice.wav"
         audio.play(url)
 
-    # とりあえずしゃべらせとく
+    # とりあえず時間しゃべらせとく
         b = datetime.now()
         say_text = str(b.hour%12) + '時' + str(b.minute) + "分です"
         jtalk.jtalk(say_text)
 
+    # 天気しゃべらす
+    wea.say(2)
+
+
 # threads start
     t=threading.Timer(1,clock_func.clock)
-    
     t.start()
 
 if __name__=="__main__":

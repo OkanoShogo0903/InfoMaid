@@ -14,7 +14,7 @@ def clock():
     global now
     now = datetime.now()
 #    global a
-    print ("clock active")
+    print ("voice clock active")
 
     if(now.minute%10 == 0):
         time_signal()
