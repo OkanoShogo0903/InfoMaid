@@ -13,6 +13,7 @@ import clock_func
 import jtalk
 import filer
 import weather
+import news as news_file
 AUDIO_URL = "../etcs/Audio/"
 
 a = datetime.now()
@@ -36,6 +37,9 @@ def main():
     # 天気しゃべらす
     wea.say(2)
 
+    # ニュースしゃべらす
+    new = news_file.NewsClass()
+    new.say_news("ねとらぼ",1)
 
 # threads start
     t=threading.Timer(1,clock_func.clock)
