@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-  
-import re 
+ 
 import shlex
 import subprocess
 from datetime import datetime
@@ -17,6 +17,7 @@ def command(text):
     try:
         # OpenJTalkを利用するためのシェルコマンドを実行する
         command = CMD_SAY + ' ' + text
+        print (command)
         proc = subprocess.Popen(shlex.split(command))
         proc.communicate()
     except:
@@ -26,16 +27,21 @@ def command(text):
 
 def jtalk(origin):
 # TODO 英語のスペルをそのまま読み上げるのをなんとかする（どじっ子）。辞書いれればなんとかなる？？
-# TODO \『|\{正規化表現で『{でsplitできない？みたい
+# TODO 『や「でsplitして、』」をreplaceする
 
     # 長い文になると言葉が途切れ途切れになるため複数に分けて出力する
-    text_list = re.split(r'\s|\[|\「', origin)
-#    text_list = re.split(r'\s|\.', origin)
-    # \s 空白
-    # \[ 半角(
-    
+    separate_chars = ['　',' '] # 『
+    text_list = [] 
+    # *******紙見ながらこのへんをなおして！！！！********
+    text_list = origin
+    for char in separate_chars:
+        tmp = origin.split(char)
+        text_list = tmp
+        print(text_list)
+
     for text in text_list:
 #        text = text.replace(' ', '')
+        text = text.replace('(', '')
         text = text.replace(')', '')
         text = text.replace('（', '')
         text = text.replace('）', '')
@@ -43,7 +49,8 @@ def jtalk(origin):
         text = text.replace('』', '')
         print(text)
         command(text)
+
 if __name__ == "__main__":
-    jtalk("ハロー「おは[よう」『ございます｛my master")
+    jtalk("ハロー　(おはよう) ございます　my （master）")
 #    say_datetime()
 

@@ -26,9 +26,9 @@ class NewsData:
         for topic in self.topic_list[:3]:
             topic["text"] = beautiful_soup.get_news_text( topic["link"], self.TEXT_POS)
 
-    def say_topic(self,lim):
+    def say_topic(self,lim_):
         jtalk.jtalk(self.SITE_NAME)
-        for topic in self.topic_list[:lim]:
+        for topic in self.topic_list[:lim_]:
             jtalk.jtalk(topic["title"])
 #            jtalk.jtalk(topic["text"])
         # 指定秒間スリープする
@@ -64,11 +64,11 @@ class NewsData:
             for topic in insert_list:
                 self.topic_list.insert(0,topic)
             '''
-    def print_all_topic(self):
+    def print_topic(self,lim_):
         count = 0
         print("---------------------------------------------------")
         print(self.SITE_NAME)
-        for topic in self.topic_list[:5]:
+        for topic in self.topic_list[:lim_]:
             print("num  : " + str(count))
             print("title: " + topic["title"])
             #print("link :" + topic["link"])
@@ -83,18 +83,6 @@ class NewsData:
 
 #------------------------------------------------------------------------
 # 外部からは見えない部分
-def news_init():
-    global news_list
-    renew_data_list = []
-    for site in site_list.site_list:
-        tmp = NewsData(site)
-        renew_data_list.append(tmp)
-
-    news_list = renew_data_list
-
-    # 一時間ごとにデータを更新するために１時間後に呼び出す
-    t=threading.Timer(60*60,data_renew)
-
 def data_renew():
 # renewで古いニュースを破棄して、新しいデータを取得する
     print("data_renew : start")
@@ -105,20 +93,40 @@ def data_renew():
 
     # 一時間ごとにデータを更新するために１時間後に呼び出す
     t=threading.Timer(60*60,data_renew)
+    t.start()
 
     print("data_renew : end")
     print()
 
 #-----------------------------------------------------------------------
 # 外から呼び出される部分
-def news_main():
+def news_init():
+    global news_list
+
+    renew_data_list = []
+    for site in site_list.site_list:
+        tmp = NewsData(site)
+        renew_data_list.append(tmp)
+
+    news_list = renew_data_list
+
+    # 一時間ごとにデータを更新するために１時間後に呼び出す
+    t=threading.Timer(60*60,data_renew)
+    t.start()
+
+def say_news(site_name,lim_):
+    global news_list
+    try:
+        for n in news_init:
+            if n[SITE_NAME] == site_name:
+                n.print_topic(lim_)
+    except:
+        pass
+    
+#-----------------------------------------------------------------------
+if __name__=="__main__":
     # initでニュースを取得してくる
     news_init()
-    
     for news in news_list:
-        news.print_all_topic()
-        news.say_topic(1)
-
-def say_news(site_neme,num):
-if __name__=="__main__":
-    news_main()
+        news.print_topic(5)
+        news.say_topic(3)
