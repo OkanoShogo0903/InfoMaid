@@ -11,6 +11,8 @@ import tweepy
 import threading
 import jtalk
 import re # seiki
+import geophysics
+import json
 #import random
 #import twitter
 
@@ -89,16 +91,22 @@ class Tweet:
                 print('TWEET text      : {}'.format(status.text))
 
     # ツイッターの検索機能
-    def print_word_search(self,word = '',count = 10,lang='ja',result_type='popular',address=''):
+    def print_word_search(self,word = '',count = 10,lang='ja',result_type='popular',address='',_range=1):
         # word : search word
         # count : search status count
         # result_type : recent,popular,mixed
         # address : 東京墨田区など町の名前
         # 指定が無いときはreturnする
         if word == '' and address == '':return
- #       if address != '':
- #           geo_json = geophysics.get_geocode(address)
- #           word = geo_json.~~~ + " " + word
+        if address != '':
+            geo_json = geophysics.get_geocode(address)
+            if geo_json == None:return
+            lat = geo_json['results'][0]['geometry']['location']['lat']
+            lng = geo_json['results'][0]['geometry']['location']['lng']
+            print("Geo Info : {} {}".format(lat,lng))
+#        result = self.api.search(q = "geocode:35.65858,139.745433,1.5km",count=100)
+            word = "geocode:" + lat + "," + lng + "," + "1.0km " + word
+            print(word)
         result = self.api.search(q = word, count = count, lang = lang, result_type = result_type)
         # count分だけ結果を出力する
         for i,status in  enumerate(reversed(result)):
@@ -150,7 +158,7 @@ if __name__=="__main__":
 #    tweet.test_house()
 #    tweet.print_timeline(like_favo_threshold = 5, search_num = 20)
 #    tweet.print_word_search(word = "メイドインアビス OR ナナチ",count = 10)
-#    tweet.print_word_search(address = "住吉",count = 10)
+    tweet.print_word_search(address = "野々市住吉",count = 10)
 
 #    t = "@okanosyogo195 @handa1123 メンションのテスト @nanati"
 #    print(t)
