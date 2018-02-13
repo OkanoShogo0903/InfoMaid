@@ -18,3 +18,9 @@ deleat:
 ~~~
 conda env remove -n ENVIRONMENT
 ~~~
+
+## pyaudio install
+~~~
+sudo apt-get install portaudio19-dev
+pip install pyaudio
+~~~
