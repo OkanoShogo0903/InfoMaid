@@ -28,7 +28,7 @@ import re # seiki
 class Tweet:
     # 初期設定で認証まわりを行う
     def __init__(self):
-        self.TEXT = ["(聞こえますか...私は今、バイト先からあなたの脳内に直接語りかけています) (tweepyによるbotテスト中)"]
+        self.TEXT = ["(tweepyによるbotテスト中)"]
         # ACCOUT : okanosyogo
         CK = 'oxzaxjtKBR067gYthawUZVWf1' # Consumer Key
         CS = 'duuaAVim00LhvM3YMwS2zJHdYHJ2rcCCazsVRrrQCxIoDrr49k' # Consumer Secret
@@ -56,48 +56,55 @@ class Tweet:
         print(user.screen_name) # okanosyogo
         print(user.status.text)
 
-    # 試作プログラムを雑に試すスペースです
-    def test_house(self):
+       
+# 緯度と経度からツイートを検索する関数。緯度と経度をGoogleMapAPIから取得する際に渡す住所の文字列が日本語ではエラーになるため未実装
+#    def geophysics_search():
 #        result = self.api.search(q = "geocode:35.65858,139.745433,1.5km",count=100)
 #        word = "geocode:35.65858,139.745433,0.5km" # TokyoTower
-        pos = "geocode:36.5310338,136.6284361,5.0km" # KIT libraryCenter
-        q = pos + " " + "ロボカップ"
-        result = self.api.search(q = q,count=100)
-        # count分だけ結果を出力する
-        for i,status in enumerate(result):
-            print('---%3d---' % (i + 1))
-            print(status.user.name)
-            print(status.text)
-        
+#        pos = "geocode:36.5310338,136.6284361,5.0km" # KIT libraryCenter
+#        q = pos + " " + "ロボカップ"
+#        result = self.api.search(q = q,count=100)
+#        # count分だけ結果を出力する
+#        for i,status in enumerate(result):
+#            print('---%3d---' % (i + 1))
+#            print(status.user.name)
+#            print(status.text)
+ 
+    # ツイッターボット機能
     def tweet_bot(self):
         self.api.update_status(status = self.TEXT)
 
     # 自分のタイムラインを表示する機能
-    def print_timeline(self , threshold = -1 , search_num = 5):
-        # threshold  : ファボとリツイートを足して[threshold]以上のツイートだけを表示
+    def print_timeline(self , like_favo_threshold = -1 , search_num = 5):
+        # like_favo_threshold  : ファボとリツイートを足して[like_favo_threshold]以上のツイートだけを表示
         # search_num : 最新[search_num]件のデータを扱う
         time_line = self.api.home_timeline()
-        for obj in time_line[:search_num]:
-            f = obj.favorite_count
-            r = obj.retweet_count
-            if f + r >= threshold:
-#                print(obj.favorite_count)
-#                print(obj.retweet_count)
-                print(obj.text)
+        for status in time_line[:search_num]:
+            f = status.favorite_count
+            r = status.retweet_count
+            if f + r >= like_favo_threshold:
+#                print(status.favorite_count)
+#                print(status.retweet_count)
+                print('TWEET user name : {}'.format(status.user.name))
+                print('TWEET text      : {}'.format(status.text))
 
     # ツイッターの検索機能
-    def print_word_search(self,word = 'none',count = 10,lang='ja',result_type='popular'):
+    def print_word_search(self,word = '',count = 10,lang='ja',result_type='popular',address=''):
         # word : search word
         # count : search status count
         # result_type : recent,popular,mixed
-        # word指定が無いときはreturnする
-        if word == 'none':return
+        # address : 東京墨田区など町の名前
+        # 指定が無いときはreturnする
+        if word == '' and address == '':return
+ #       if address != '':
+ #           geo_json = geophysics.get_geocode(address)
+ #           word = geo_json.~~~ + " " + word
         result = self.api.search(q = word, count = count, lang = lang, result_type = result_type)
         # count分だけ結果を出力する
-        for i,status in  enumerate(result):
-            print('---%3d---' % (i + 1))
-            print(status.user.name)
-            print(status.text)
+        for i,status in  enumerate(reversed(result)):
+            print('TWEET---%3d---' % (i + 1))
+            print('TWEET user name : {}'.format(status.user.name))
+            print('TWEET text      : {}'.format(status.text))
 
     # 自分に返信があったときに反応して読み上げるスレッド
     def reaction_for_mentions(self):
@@ -106,33 +113,33 @@ class Tweet:
             # 投稿時間を見て、新しいメンションかどうかを判断する
             if status.created_at > self.threshold_time:
                 self.threshold_time = status.created_at
-                # プリントと読み上げ
-                # TODO @から半角スペースまでの間を削除する
+                # プリントと読み上げを行う
                 # TODO 逆順で複数のツイートを検知する -> reversed追加した
                 print('---%3d---' % (i + 1))
 
-                # ＠から始まって、任意の英数字以外、任意の空白文字までを消したい(例：@okanosyogo こんにちわ)
-                say_text = re.sub('^@\w$s','re',status.text)
-#                say_text = say_text.replace('@* ','')
+                say_text = "メンションが確認されました。"
+                say_text += status.user.name + "から。"
+                say_text += self.format_text(status.text)
                 jtalk.jtalk(say_text) # 最新のmentionを読み上げる
 
-                print(status.user.name)
-                print(say_text)
-#            else:
-#                print("none tweet")
-                
+                print('TWEET user name : {}',format(status.user.name))
+                print('TWEET text      : {}',format(status.text))
 
     # twitterに関係する関数を回すスレッド
     def twitter_thread(self):
         self.reaction_for_mentions()
 
         # スレッドを回しておく
-        t = threading.Timer(5,self.twitter_thread)
+        t = threading.Timer(60,self.twitter_thread)
         t.start()
     
     def format_text(self,text):
         # メンションの削除
+        # ＠から始まって、任意の英数字以外、任意の空白文字まで一個だけ消す
+        # (例：@okanosyogo @handa1123 こんにちわ → @handa1123 こんにちわ)
         res = re.sub(r'(^@\w* )+',"",text)
+        # TODO URLの削除
+        # TODO RTの削除
 #       res = re.sub('RT', "", text)
         return res
         
@@ -141,11 +148,12 @@ if __name__=="__main__":
     tweet = Tweet()
 #    tweet.tweet_bot()
 #    tweet.test_house()
-#    tweet.print_timeline(threshold = 5, search_num = 20)
+#    tweet.print_timeline(like_favo_threshold = 5, search_num = 20)
 #    tweet.print_word_search(word = "メイドインアビス OR ナナチ",count = 10)
+#    tweet.print_word_search(address = "住吉",count = 10)
 
-    t = "@okanosyogo195 @handa1123 メンションのテスト @nanati"
-    print(t)
-    print(tweet.format_text(t))
+#    t = "@okanosyogo195 @handa1123 メンションのテスト @nanati"
+#    print(t)
+#    print(tweet.format_text(t))
 #    jtalk.jtalk(say_text) # 最新のmentionを読み上げる
 
