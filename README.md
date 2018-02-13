@@ -3,3 +3,5 @@
 # TODO あらかじめクラスを作っておいて、そこでrssの発行時刻参照して古くなった記事だけを上書きするプログラムにする
 # TODO 利用するサイトの数を増やす
 # TODO 
+# installer
+pip install python-twitter
