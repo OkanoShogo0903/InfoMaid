@@ -14,3 +14,7 @@ inport :
 ~~~
 conda env create -f (export_name).yaml
 ~~~
+deleat:
+~~~
+conda env remove -n ENVIRONMENT
+~~~
