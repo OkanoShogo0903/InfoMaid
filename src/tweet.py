@@ -91,23 +91,27 @@ class Tweet:
                 print('TWEET text      : {}'.format(status.text))
 
     # ツイッターの検索機能
-    def print_word_search(self,word = '',count = 10,lang='ja',result_type='popular',address='',_range=1):
+    def print_word_search(self,word = None,count = 10,lang='ja',result_type='popular',address=None,_range=1.0):
         # word : search word
         # count : search status count
         # result_type : recent,popular,mixed
         # address : 東京墨田区など町の名前
+
         # 指定が無いときはreturnする
-        if word == '' and address == '':return
-        if address != '':
+        if word == None and address == None:return
+        # 住所や場所のキーワードが入力されているときは緯度経度を付与する
+        if address != None:
             geo_json = geophysics.get_geocode(address)
             if geo_json == None:return
             lat = geo_json['results'][0]['geometry']['location']['lat']
             lng = geo_json['results'][0]['geometry']['location']['lng']
             print("Geo Info : {} {}".format(lat,lng))
-#        result = self.api.search(q = "geocode:35.65858,139.745433,1.5km",count=100)
-            word = "geocode:" + lat + "," + lng + "," + "1.0km " + word
+#           result = self.api.search(q = "geocode:35.65858,139.745433,1.5km",count=100)
+            word = "geocode:" + lat + "," + lng + "," + _range + "km " + word
             print(word)
+
         result = self.api.search(q = word, count = count, lang = lang, result_type = result_type)
+
         # count分だけ結果を出力する
         for i,status in  enumerate(reversed(result)):
             print('TWEET---%3d---' % (i + 1))
