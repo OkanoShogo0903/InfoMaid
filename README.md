@@ -14,3 +14,9 @@ inport :
 ~~~
 conda env create -f (export_name).yaml
 ~~~
+
+## OpenJTalk
+it is test code
+~~~
+cp ./etcs/Miku_A/ /usr/share/hts-voice/
+~~~

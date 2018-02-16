@@ -20,13 +20,16 @@ import json
     #   ・自分へ返信があったら読み上げる
     #   ・たまに最新のタイムラインをいくつか読み上げる（初期のつぶやき機能の感じ）
     #   ・ツイッターのワード検索（オプションとして位置などを指定できる）
+    # geophysics.pyで緯度経度をjson取得してリストで返すようにする
+    # 自分に対する返信を読み上げる
 
     # TODO
+    # 直近のタイムラインを読み上げる
     # タイムラインが更新されたら読み上げる関数（使わんわ、没）
-    # 自分に対する返信を読み上げる
-    # geophysics.pyで緯度経度をjson取得してリストで返すようにする
-    # 特定ユーザの最新ツイートを検知する監視機能
-
+    # 特定ユーザの最新ツイートを検知する監視機能(いらんくね?)
+    # timelineとmentionでかぶるものがあったら省く? メンションかタイムラインで一方だけを有効にするなら問題ない
+    # URLと他人へのメンションとか消す
+    # あと広告も消す
 class Tweet:
     # 初期設定で認証まわりを行う
     def __init__(self):
@@ -42,104 +45,118 @@ class Tweet:
         self.api = tweepy.API(auth)
 
         # 閾時間の記憶
-        latest_timeline = self.api.mentions_timeline(count=1)[0]
-        self.threshold_time = latest_timeline.created_at
+        latest = self.api.mentions_timeline(count=1)[0]
+        self.timeline_threshold_time = latest.created_at
+        self.mention_threshold_time = latest.created_at
         # スレッドを回しておく
         t = threading.Timer(1,self.twitter_thread)
         t.start()
     
-    # 自分のアカウントデータを表示する関数（試作品の意味合い強いです）
-    def my_account_data(self):
-        user = self.api.me()
-        # 自分のid
-        print(user.id) # 3107659669
-        # 自分の名前
-        print(user.name) # キッチン
-        print(user.screen_name) # okanosyogo
-        print(user.status.text)
+#    # 自分のアカウントデータを表示する関数（試作品の意味合い強いです）
+#    def my_account_data(self):
+#        user = self.api.me()
+#        # 自分のid
+#        print(user.id) # 3107659669
+#        # 自分の名前
+#        print(user.name) # キッチン
+#        print(user.screen_name) # okanosyogo
+#        print(user.status.text)
 
        
-# 緯度と経度からツイートを検索する関数。緯度と経度をGoogleMapAPIから取得する際に渡す住所の文字列が日本語ではエラーになるため未実装
-#    def geophysics_search():
-#        result = self.api.search(q = "geocode:35.65858,139.745433,1.5km",count=100)
-#        word = "geocode:35.65858,139.745433,0.5km" # TokyoTower
-#        pos = "geocode:36.5310338,136.6284361,5.0km" # KIT libraryCenter
-#        q = pos + " " + "ロボカップ"
-#        result = self.api.search(q = q,count=100)
-#        # count分だけ結果を出力する
-#        for i,status in enumerate(result):
-#            print('---%3d---' % (i + 1))
-#            print(status.user.name)
-#            print(status.text)
- 
     # ツイッターボット機能
     def tweet_bot(self):
         self.api.update_status(status = self.TEXT)
 
-    # 自分のタイムラインを表示する機能
-    def print_timeline(self , like_favo_threshold = -1 , search_num = 5):
-        # like_favo_threshold  : ファボとリツイートを足して[like_favo_threshold]以上のツイートだけを表示
-        # search_num : 最新[search_num]件のデータを扱う
-        time_line = self.api.home_timeline()
-        for status in time_line[:search_num]:
-            f = status.favorite_count
-            r = status.retweet_count
-            if f + r >= like_favo_threshold:
-#                print(status.favorite_count)
-#                print(status.retweet_count)
-                print('TWEET user name : {}'.format(status.user.name))
-                print('TWEET text      : {}'.format(status.text))
-
-    # ツイッターの検索機能
-    def print_word_search(self,word = None,count = 10,lang='ja',result_type='popular',address=None,_range=1.0):
-        # word : search word
-        # count : search status count
-        # result_type : recent,popular,mixed
-        # address : 東京墨田区など町の名前
+    def word_search(self,_word = "",_count = 10,_lang='ja',_result_type='popular',_address=None,_range=5.0):
+        """ ツイッターの検索機能 """
+        # _word : search _word
+        # _count : search status count
+        # _result_type : recent,popular,mixed
+        # _address : 東京墨田区など町の名前
 
         # 指定が無いときはreturnする
-        if word == None and address == None:return
-        # 住所や場所のキーワードが入力されているときは緯度経度を付与する
-        if address != None:
-            geo_json = geophysics.get_geocode(address)
+        if _word == "" and _address == None:return
+        # 住所や場所のキーワードが入力されているときは、GoogleMapApiから緯度経度を付与する
+        if _address != None:
+            geo_json = geophysics.get_geocode(_address)
             if geo_json == None:return
             lat = geo_json['results'][0]['geometry']['location']['lat']
             lng = geo_json['results'][0]['geometry']['location']['lng']
-            print("Geo Info : {} {}".format(lat,lng))
-#           result = self.api.search(q = "geocode:35.65858,139.745433,1.5km",count=100)
-            word = "geocode:" + lat + "," + lng + "," + _range + "km " + word
-            print(word)
+            geocode = "{},{},{}km".format(lat,lng,_range)
+        else:
+            geocode = None
+            
+        # _result_typeを指定するときはgeocodeを指定できない
+        # _result_typeを有効にするとなにもでない？？
+        result = self.api.search(q=_word, count=_count, lang=_lang, geocode=geocode)
 
-        result = self.api.search(q = word, count = count, lang = lang, result_type = result_type)
-
-        # count分だけ結果を出力する
+        print(result)
+        # if resultの結果が0ではないとき:
+        # 得られた結果の分だけ結果を出力する
+        jtalk.jtalk("検索結果を読み上げます")
         for i,status in  enumerate(reversed(result)):
             print('TWEET---%3d---' % (i + 1))
             print('TWEET user name : {}'.format(status.user.name))
             print('TWEET text      : {}'.format(status.text))
+            jtalk.jtalk("{}様より".format(status.user.name))
+            jtalk.jtalk("{}".format(status.text))
+        #else:
+        #   jtalk.jtalk("検索結果を読み上げます")
 
-    # 自分に返信があったときに反応して読み上げるスレッド
+
+    def timeline(self , _like_favo_threshold = -1 , _search_num = 5):
+        """ 自分の新しいタイムラインを表示する機能 """
+        # _like_favo_threshold  : ファボとリツイートを足して[_like_favo_threshold]以上のツイートだけを表示
+        # _search_num : 最新[_search_num]件のデータを扱う
+        result = self.api.home_timeline()
+        for i,status in  enumerate(reversed(result[:_search_num])):
+            # 投稿時間を見て、新しいメンションかどうかを判断する
+            if status.created_at > self.timeline_threshold_time:
+                self.timeline_threshold_time = status.created_at
+                
+                # ファボとリツイートの数をとる
+                f = status.favorite_count
+                r = status.retweet_count
+
+                # 人気のツイートだけを表示
+                if f + r >= _like_favo_threshold:
+                    print('---%3d---' % (i + 1))
+                    print('TWEET user name : {}'.format(status.user.name))
+                    print('TWEET text      : {}'.format(status.text))
+    #                print(status.favorite_count)
+    #                print(status.retweet_count)
+
+                    jtalk.jtalk("タイムラインが更新されました")
+                    jtalk.jtalk("{}様より".format(status.user.name))
+                    jtalk.jtalk("{}".format(status.text))
+
+
     def reaction_for_mentions(self):
+        """ 自分に返信があったときに反応して読み上げるスレッド """
         result = self.api.mentions_timeline(count=5)
         for i,status in  enumerate(reversed(result)):
             # 投稿時間を見て、新しいメンションかどうかを判断する
-            if status.created_at > self.threshold_time:
-                self.threshold_time = status.created_at
+            if status.created_at > self.mention_threshold_time:
+                self.mention_threshold_time = status.created_at
                 # プリントと読み上げを行う
                 # TODO 逆順で複数のツイートを検知する -> reversed追加した
                 print('---%3d---' % (i + 1))
-
-                say_text = "メンションが確認されました。"
-                say_text += status.user.name + "から。"
-                say_text += self.format_text(status.text)
-                jtalk.jtalk(say_text) # 最新のmentionを読み上げる
-
                 print('TWEET user name : {}',format(status.user.name))
                 print('TWEET text      : {}',format(status.text))
+
+                jtalk.jtalk("{}様より、メンションが確認されました".format(status.user.name))
+                jtalk.jtalk("{}".format(status.text))
+
+                #say_text = "メンションが確認されました。"
+                #say_text += status.user.name + "から。"
+                #say_text += self.format_text(status.text)
+                #jtalk.jtalk(say_text) # 最新のmentionを読み上げる
+
 
     # twitterに関係する関数を回すスレッド
     def twitter_thread(self):
         self.reaction_for_mentions()
+        self.timeline(_like_favo_threshold = 5, _search_num = 20)
 
         # スレッドを回しておく
         t = threading.Timer(60,self.twitter_thread)
@@ -160,12 +177,8 @@ if __name__=="__main__":
     tweet = Tweet()
 #    tweet.tweet_bot()
 #    tweet.test_house()
-#    tweet.print_timeline(like_favo_threshold = 5, search_num = 20)
-#    tweet.print_word_search(word = "メイドインアビス OR ナナチ",count = 10)
-    tweet.print_word_search(address = "野々市住吉",count = 10)
-
-#    t = "@okanosyogo195 @handa1123 メンションのテスト @nanati"
-#    print(t)
-#    print(tweet.format_text(t))
-#    jtalk.jtalk(say_text) # 最新のmentionを読み上げる
+#    tweet.timeline(_like_favo_threshold = 5, _search_num = 20)
+#    tweet.word_search(_word = "メイドインアビス OR ナナチ",_count = 10)
+#    tweet.word_search(_word = "ナナチ",_address = "東京タワー",_count = 100,_range=10.0)
+#    tweet.word_search(_word = "ナナチ",_count = 10)
 
