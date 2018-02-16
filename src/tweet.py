@@ -156,7 +156,7 @@ class Tweet:
     # twitterに関係する関数を回すスレッド
     def twitter_thread(self):
         self.reaction_for_mentions()
-        self.timeline(_like_favo_threshold = 5, _search_num = 20)
+        self.timeline(_like_favo_threshold = 5, _search_num = 5)
 
         # スレッドを回しておく
         t = threading.Timer(60,self.twitter_thread)
@@ -167,6 +167,8 @@ class Tweet:
         # ＠から始まって、任意の英数字以外、任意の空白文字まで一個だけ消す
         # (例：@okanosyogo @handa1123 こんにちわ → @handa1123 こんにちわ)
         res = re.sub(r'(^@\w* )+',"",text)
+#        res = re.sub(r'(^http\w* )+',"",res)
+#        res = res.replace('RT ', '')
         # TODO URLの削除
         # TODO RTの削除
 #       res = re.sub('RT', "", text)
@@ -182,3 +184,8 @@ if __name__=="__main__":
 #    tweet.word_search(_word = "ナナチ",_address = "東京タワー",_count = 100,_range=10.0)
 #    tweet.word_search(_word = "ナナチ",_count = 10)
 
+#    print(tweet.format_text("\
+#            RT @momoco_haru: 第２回 Modernistic Illustration Galleryで「手のひらの踊り子」というイラストが入選・そして優秀賞をいただきました。\
+#            3/01～3/07まで東京都美術館（上野）にて展示されるそうです。\
+#            https://t.co/H…\
+#            "))
