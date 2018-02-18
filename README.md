@@ -1,6 +1,15 @@
 # InfoMaid
-繧ｽ繝輔ヨ繧ｦ繧ｧ繧｢縺ｮ髱｢縺九ｉ繝｡繧､繝峨＆繧灘卸菴懊↓蟇ｾ縺吶ｋ繧｢繝励Ο繝ｼ繝√ｒ陦後≧
+情報の面からメイドさん創作に対するアプローチを行う
+### できること
+* 天気やニュース情報の提供
+* SNSのメンションやタイムラインの通知及び読み上げ
+* 朝起こしてくれる
+* 独り言をしゃべる
+* ワードについて検索する
+とかそんな感じの機能がたくさん
+
 ## TODO 
+いろいろ
 ## installer
 pip install python-twitter
 
@@ -31,4 +40,5 @@ install OpenJTalk (http://shokai.org/blog/archives/6893)
 ~~~
 sudo apt-get install open-jtalk open-jtalk-mecab-naist-jdic htsengine libhtsengine-dev hts-voice-nitech-jp-atr503-m001
 ~~~
+
 
