@@ -63,22 +63,6 @@ class NewsData:
             for topic in insert_list:
                 self.topic_list.insert(0,topic)
             '''
-    def print_topic(self,lim_):
-        count = 0
-        print("---------------------------------------------------")
-        print(self.SITE_NAME)
-        for topic in self.topic_list[:lim_]:
-            print("num  : " + str(count))
-            print("title: " + topic["title"])
-            #print("link :" + topic["link"])
-            print("time : " + topic["published_string"])
-#            print(topic["published_datetime"].day)
-#            print(topic["published_datetime"].hour)
-            print("cate : " + topic["category"])
-            print("text : " + topic["text"][:50])
-            print()
-            count += 1
-        print("---------------------------------------------------")
 
 #------------------------------------------------------------------------
 class NewsClass:

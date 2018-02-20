@@ -46,8 +46,9 @@ class Tweet:
 
         # 閾時間の記憶
         latest = self.api.mentions_timeline(count=1)[0]
-        self.timeline_threshold_time = latest.created_at
         self.mention_threshold_time = latest.created_at
+        latest = self.api.home_timeline(count=1)[0]
+        self.timeline_threshold_time = latest.created_at
         # スレッドを回しておく
         t = threading.Timer(1,self.twitter_thread)
         t.start()
@@ -90,18 +91,21 @@ class Tweet:
         # _result_typeを有効にするとなにもでない？？
         result = self.api.search(q=_word, count=_count, lang=_lang, geocode=geocode)
 
-        print(result)
-        # if resultの結果が0ではないとき:
-        # 得られた結果の分だけ結果を出力する
-        jtalk.jtalk("検索結果を読み上げます")
-        for i,status in  enumerate(reversed(result)):
-            print('TWEET---%3d---' % (i + 1))
-            print('TWEET user name : {}'.format(status.user.name))
-            print('TWEET text      : {}'.format(status.text))
-            jtalk.jtalk("{}様より".format(status.user.name))
-            jtalk.jtalk("{}".format(status.text))
-        #else:
-        #   jtalk.jtalk("検索結果を読み上げます")
+        if len(result) == 0:
+            # 検索してなにも引っかからなかったとき
+            jtalk.jtalk("検索しましたが、該当するものはありませんでした")
+        else:
+            # 得られた結果の分だけ結果を出力する
+            jtalk.jtalk("{}個のツイートがヒットしました".format(len(result)))
+#            jtalk.jtalk("検索結果を読み上げます")
+            for i,status in  enumerate(reversed(result)):
+                print('TWEET---%3d---' % (i + 1))
+                print('広告がヒット'.format(status.user.notifications))
+                if status.user.notifications == True: continue
+                print('TWEET user name : {}'.format(status.user.name))
+                print('TWEET text      : {}'.format(status.text))
+                jtalk.jtalk("{}様より".format(status.user.name))
+                jtalk.jtalk("{}".format(self.format_text(status.text)))
 
 
     def timeline(self , _like_favo_threshold = -1 , _search_num = 5):
@@ -110,6 +114,9 @@ class Tweet:
         # _search_num : 最新[_search_num]件のデータを扱う
         result = self.api.home_timeline()
         for i,status in  enumerate(reversed(result[:_search_num])):
+            if status.user.notifications == True:
+                print('広告がヒット {}'.format(status.user.notifications))
+#                continue
             # 投稿時間を見て、新しいメンションかどうかを判断する
             if status.created_at > self.timeline_threshold_time:
                 self.timeline_threshold_time = status.created_at
@@ -128,7 +135,7 @@ class Tweet:
 
                     jtalk.jtalk("タイムラインが更新されました")
                     jtalk.jtalk("{}様より".format(status.user.name))
-                    jtalk.jtalk("{}".format(status.text))
+                    jtalk.jtalk("{}".format(self.format_text(status.text)))
 
 
     def reaction_for_mentions(self):
@@ -145,7 +152,7 @@ class Tweet:
                 print('TWEET text      : {}',format(status.text))
 
                 jtalk.jtalk("{}様より、メンションが確認されました".format(status.user.name))
-                jtalk.jtalk("{}".format(status.text))
+                jtalk.jtalk("{}".format(self.format_text(status.text)))
 
                 #say_text = "メンションが確認されました。"
                 #say_text += status.user.name + "から。"
@@ -157,10 +164,10 @@ class Tweet:
     def twitter_thread(self):
 #        return
         self.reaction_for_mentions()
-        self.timeline(_like_favo_threshold = 5, _search_num = 5)
+        self.timeline(_like_favo_threshold = 0, _search_num = 5)
 
         # スレッドを回しておく
-        t = threading.Timer(60,self.twitter_thread)
+        t = threading.Timer(30,self.twitter_thread)
         t.start()
     
     def format_text(self,text):
@@ -183,7 +190,7 @@ if __name__=="__main__":
 #    tweet.timeline(_like_favo_threshold = 5, _search_num = 20)
 #    tweet.word_search(_word = "メイドインアビス OR ナナチ",_count = 10)
 #    tweet.word_search(_word = "ナナチ",_address = "東京タワー",_count = 100,_range=10.0)
-#    tweet.word_search(_word = "ナナチ",_count = 10)
+#    tweet.word_search(_word = "@okanosyogo AND http",_count = 100)
 
     print(tweet.format_text("\
             RT @momoco_haru: 第２回 Modernistic Illustration Galleryで「手のひらの踊り子」というイラストが入選・そして優秀賞をいただきました。\
