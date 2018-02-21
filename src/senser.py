@@ -4,53 +4,71 @@ from datetime import datetime
 import threading
 import time
 import RPi.GPIO as GPIO
+from enum import Enum
  
 # init
-SENSOR_PORT=14
+SENSOR_PORT=17
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(SENSOR_PORT, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 #GPIO.setup(SENSOR_PORT, GPIO.IN)
 
-# 他のプログラムから参照されるフラグ
-is_leave = False
-is_come = False
-is_wakeup = True # プログラム起動時には既に起きてるからTrur
-
-# おでかけ検知
-def get_leave_home():
-    return is_leave
-# 帰宅検知
-def get_come_home():
-    return is_come
-# 起床検知
-def get_wakeup():
-    return is_wakeup
+# 使用者は毎日家に帰ってくるとする
+class Status(Enum):
+    sleep = 0 # 寝てる
+    home = 1 # 家で起きて活動している
+    leave = 2 # 家にいない
 
 def deinit():
     GPIO.cleanup()
  
-def sencer_check():
-    if GPIO.input(SENSOR_PORT) == GPIO.HIGH :
-        print ("OK {}".format(GPIO.input(SENSOR_PORT)))
-    else :
-        print ("NG {}".format(GPIO.input(SENSOR_PORT)))
+def motion_sencer():
+    res = GPIO.input(SENSOR_PORT)
+    print ("MOTION SENCER : {}".format(res)) # 0,1
+    return res
 
 def sencer_thread():
-    # 一日の終わりに各フラグのリセット
+    global status,motion_queue
+    # 一日の終わりに状態のリセットをする
     now = datetime.now()
     if now.hour == 4 and now.minute == 0:
-        is_leave = false
-        is_come = false
-        is_wakeup = false
+        status.value = status.sleep      
+
+    # 小数点以下が欲しいので、1.0を掛けている
+    # 人感センサの反応した割合 = (1の個数/全体の個数)*100
+    motion_rate_long = 1.0 * motion_queue.count(1) / len(motion_queue)
+    motion_rate_short = 1.0 * (motion_queue[:short_valid_time]).count(1) / len(motion_queue[:short_valid_time])
+
+    if status == status.sleep:
+        if motion_rate_short >= 0.4: # 朝起きたと判断する条件
+            status = status.home
+            # ~~~ ここが起きたタイミング！！！ ~~~
+
+    elif status == status.home:
+        if motion_rate_long <= 0.05: # 外出したと判断する条件
+            status = status.leave
+
+    elif status == status.leave:
+        if motion_rate_short >= 0.2: # 帰ってきたと判断する条件
+            status = status.home
+            # ~~~ ここが帰ってきたタイミング！！！ ~~~
 
     # センサーのデータ取得
-    sencer_check()
+    motion_queue.insert(0, motion_sencer()) # キューの先頭にデータをいれる
+    motion_queue.pop(-1) # 一番古いデータを抜く
 
-    t = threading.Timer(200,sencer_thread) # x秒毎でサンプリング
+    if 0: # print out
+        print("SENCER hit rate long  : {}".format(motion_rate_long))
+        print("SENCER hit rate short : {}".format(motion_rate_short))
+        print("SENCER status name    : {}".format(status))
+
+    t = threading.Timer(1,sencer_thread) # x秒毎でサンプリング
     t.start()
-    
-if __name__ == '__main__':
-#  sys.exit(led_indicator())
-#    led_init()
-    t = threading.Timer(1,sencer_thread)
-    t.start()
+
+# MainFunc
+# センサーデータの保存時間
+long_valid_time = 60*60 # 60*60(sec) = 1(hour)
+short_valid_time = 5 # x(sec)
+status = Status(1) # プログラム起動時は家で起きているので、状態はhome=1の1にする
+motion_queue = [1]*long_valid_time # defaultで個の1が入ったキュー
+
+sencer_thread()
