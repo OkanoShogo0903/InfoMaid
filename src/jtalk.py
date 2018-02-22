@@ -17,6 +17,7 @@ def command(text):
     try:
         # OpenJTalkを利用するためのシェルコマンドを実行する
         command = CMD_SAY + ' ' + text
+        # subprocess.check_call()
         proc = subprocess.Popen(shlex.split(command))
         proc.communicate()
     except:
