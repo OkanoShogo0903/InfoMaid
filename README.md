@@ -75,16 +75,18 @@ Bus 001 Device 003: ID 0424:ec00 Standard Microsystems Corp. SMSC9512/9514 Fast 
 Bus 001 Device 002: ID 0424:9514 Standard Microsystems Corp. SMC9514 Hub
 Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
 ~~~
+
 ## オーディオモジュールの設定
 ### 優先順位の確認
 以下のコマンドで確認できる。  
-名前の前に出てくる数字が優先順位で、snd_usb_audioを最優先にしたい。
+名前の前に出てくる数字が優先順位で、snd_usb_audioを最優先にしたい。  
 おそらく、初めは以下のようにUSBマイクの方が優先順位が低くなっている。
 ~~~
 $ cat /proc/asound/modules
  0 snd_bcm2835
  1 snd_usb_audio
 ~~~
+
 ### 優先順位の書き換え
 下記のように設定を変更する。  
 この**alsa_base.confが存在しない場合は、新しく作る**。ソースは[ここ](https://qiita.com/kinpira/items/75513eaab6eed19da9a3)。
@@ -94,6 +96,7 @@ options snd slots=snd_usb_audio,snd_bcm2835
 options snd_usb_audio index=0
 options snd_bcm2835 index=1
 ~~~
+
 ### 再度、優先順位の確認
 一度**再起動**してから、再度オーディオモジュールの優先順位を確認する。
 ~~~
@@ -140,8 +143,12 @@ $ arecord -l
 $ arecord -D plughw:0,0 test.wav
 ~~~
 ### 録音したものを再生する
-以下のコマンドで、デバイスを確認します。
-カード:1のデバイス:1はHDMIなので、これは違うようです。
+~~~
+aplay test.wav
+~~~
+#### うまく再生されなかったとき
+以下のコマンドで、デバイスを確認します。  
+カード:1のデバイス:1はHDMIなので、これは違うようです。  
 カード:1のデバイス:0を使えばいいことが分かります。
 ~~~
 $ aplay -l
@@ -160,9 +167,12 @@ $ aplay -l
     サブデバイス: 1/1
     サブデバイス #0: subdevice #0
 ~~~
+そして、上記のコマンドから分かったカードとデバイスを使って、
 ~~~
-arecord -D plughw:0,0 test.wav
+$ aplay -Dhw:1,0 test.wav
 ~~~
-## Julius Install
+## Julius
+### Install
+
 ------------
 # Using
