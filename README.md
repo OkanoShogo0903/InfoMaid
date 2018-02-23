@@ -60,7 +60,6 @@ It is test code
 $ cp ./etcs/Miku_A/ /usr/share/hts-voice/
 ~~~
 
-[参考にしたサイト](https://qiita.com/t_oginogin/items/f0ba9d2eb622c05558f4)
 ## ライブラリのインストール
 ~~~
 $ sudo apt-get install alsa-utils sox libsox-fmt-all
@@ -107,6 +106,7 @@ $ cat /proc/asound/modules
 こんな風に優先順位が変わっているはず
 
 ## マイクの設定
+[参考にしたサイト](https://qiita.com/t_oginogin/items/f0ba9d2eb622c05558f4)
 ### マイクのカード番号を確認
 ~~~
 $ arecord -l
@@ -173,6 +173,24 @@ $ aplay -Dhw:1,0 test.wav
 ~~~
 ## Julius
 ### Install
-
+* [Julius](http://julius.osdn.jp/)のソースコードからコンパイル
+~~~
+$ wget --trust-server-names 'http://osdn.jp/frs/redir.php?m=iij&f=%2Fjulius%2F60273%2Fjulius-4.3.1.tar.gz'
+$ tar xvzf julius-4.3.1.tar.gz
+$ cd julius-4.3.1/
+$ ./configure
+$ make
+~~~
+* ディクテーションファイル
+~~~
+$ mkdir ~/julius-kits
+$ cd ~/julius-kits
+$ wget --trust-server-names 'http://osdn.jp/frs/redir.php?m=iij&f=%2Fjulius%2F60416%2Fdictation-kit-v4.3.1-linux.tgz'
+$ tar xvzf dictation-kit-v4.3.1-linux.tgz
+~~~
+* Juliusの実行(plughw:0,0はマイクのカードとデバイスの番号)
+~~~
+$ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
+~~~
 ------------
 # Using
