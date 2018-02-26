@@ -45,6 +45,7 @@ $ sudo apt-get install portaudio19-dev
 $ pip install pyaudio
 
 $ pip install python-twitter
+$ pip install tweepy
 ~~~
 
 ## OpenJtalk Install
