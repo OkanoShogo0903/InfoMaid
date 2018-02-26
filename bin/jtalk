@@ -1,33 +1,51 @@
-#!/bin/sh
-TMP=/tmp/jsay.wav
-#cd /usr/share/hts-voice/nitech-jp-atr503-m001
-cd /usr/share/hts-voice/mei_happy
-echo "$1" | open_jtalk \
-    -td tree-dur.inf \
-    -tf tree-lf0.inf \
-    -tm tree-mgc.inf \
-    -md dur.pdf \
-    -mf lf0.pdf \
-    -mm mgc.pdf \
-    -dm mgc.win1 \
-    -dm mgc.win2 \
-    -dm mgc.win3 \
-    -df lf0.win1 \
-    -df lf0.win2 \
-    -df lf0.win3 \
-    -dl lpf.win1 \
-    -ef tree-gv-lf0.inf \
-    -em tree-gv-mgc.inf \
-    -cf gv-lf0.pdf \
-    -cm gv-mgc.pdf \
-    -k gv-switch.inf \
-    -s 16000 \
-    -a 0.05 \
+#!/bin/bash
+
+#HV=/usr/share/hts-voice/nitech-jp-atr503-m001/nitech_jp_atr503_m001.htsvoice
+#HV=/usr/share/hts-voice/mei/mei_happy.htsvoice
+HV=/usr/share/hts-voice/Miku_A/Voice.htsvoice
+
+# options:                                                                   [  def][ min-- max]
+#     -x  dir        : dictionary directory                                    [  N/A]
+#     -m  htsvoice   : HTS voice files                                         [  N/A]
+#     -ow s          : filename of output wav audio (generated speech)         [  N/A]
+
+#     -ot s          : filename of output trace information                    [  N/A]
+#     -s  i          : sampling frequency                                      [ auto][   1--    ]
+#     -p  i          : frame period (point)                                    [ auto][   1--    ]
+#     -a  f          : all-pass constant                                       [ auto][ 0.0-- 1.0]
+
+#     -b  f          : postfiltering coefficient                               [  0.0][ 0.0-- 1.0]
+#     -r  f          : speech speed rate                                       [  1.0][ 0.0--    ]
+#     -fm f          : additional half-tone                                    [  0.0][    --    ]
+#     -u  f          : voiced/unvoiced threshold                               [  0.5][ 0.0-- 1.0]
+#     -jm f          : weight of GV for spectrum                               [  1.0][ 0.0--    ]
+#     -jf f          : weight of GV for log F0                                 [  1.0][ 0.0--    ]
+#     -g  f          : volume (dB)                                             [  0.0][    --    ]
+#     -z  i          : audio buffer size (if i==0, turn off)                   [    0][   0--    ]
+
+tempfile=`tempfile`
+option="-m $HV \
+    -r 1.0 \
+    -s 20000 \
+    -p 100 \
+    -a 0.03 \
     -u 0.0 \
     -jm 1.0 \
     -jf 1.0 \
-    -jl 1.0 \
+    -a 0.0 \
+    -fm 2.0 \
     -x /var/lib/mecab/dic/open-jtalk/naist-jdic \
-    -ow $TMP && \
-    aplay --quiet $TMP
-rm -f $TMP
+    -ow $tempfile"
+
+if [ -z "$1" ] ; then
+    open_jtalk $option
+else 
+    if [ -f "$1" ] ; then
+        open_jtalk $option $1
+    else 
+        echo "$1" | open_jtalk $option
+    fi
+fi
+
+aplay --quiet $tempfile
+rm $tempfile
