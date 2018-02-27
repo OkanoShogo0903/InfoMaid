@@ -43,9 +43,13 @@ static routers=172.16.0.1
 static domain_name_servers=210.196.228.210 210.196.3.183
 ~~~
 **After etc/dhcpd.conf edit,you should reboot**
-* vim
+* JapaseneKey
+~~~
+$ sudo apt-get install ibus-anthy
+~~~
+* Vim
 $ sudo apt-get install vim
-* git
+* Git
 ~~~
 $ sudo apt-get install git
 $ git config --global alias.graph "log --graph --date-order --all --pretty=format:'%h %Cred%d %Cgreen%ad %Cblue%cn %Creset%s' --date=short"
@@ -72,12 +76,13 @@ $ conda env remove -n (EXPORT_NAME)
 ~~~
 
 ## Library Install
+TODO
+pyaduioはこのportaudioを入れなければ聞かない可能性もあるので、
+この欄の扱いは保留
 *pyaudio* is cannot install by normal pip
 ~~~
 $ sudo apt-get install portaudio19-dev
 $ pip install pyaudio
-
-$ pip install RPi.GPIO
 ~~~
 ------------
 ## OpenJtalk Install
