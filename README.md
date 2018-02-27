@@ -21,33 +21,63 @@
 
 * ソースコード部分の表示はQiitaではもっとかっこよく背景青っぽくなっているので、それにしたい
 ------------
-# Install
-## Miniconda
+# RaspberryPi SetUp
+* Internet Activate 
+~~~
+$ vi /etc/dhcpd.conf
+~~~
+before
+~~~
+# Example static IP configuration:
+#interface eth0
+#static ip_address=192.168.0.10/24
+#static ip6_address=fd51:42f8:caae:d92e::ff/64
+#static routers=192.168.0.1
+#static domain_name_servers=192.168.0.1 8.8.8.8 fd51:42f8:caae:d92e::1
+~~~
+after
+~~~
+# Example static IP configuration:
+interface eth0static ip_address=172.16.158.41/16
+static routers=172.16.0.1
+static domain_name_servers=210.196.228.210 210.196.3.183
+~~~
+**After etc/dhcpd.conf edit,you should reboot**
+* vim
+$ sudo apt-get install vim
+* git
+~~~
+$ sudo apt-get install git
+$ git config --global alias.graph "log --graph --date-order --all --pretty=format:'%h %Cred%d %Cgreen%ad %Cblue%cn %Creset%s' --date=short"
+~~~
+* Miniconda
+[download Miniconda Python3.x for **ARM**](https://raspberrypi.stackexchange.com/questions/45663/which-miniconda-version-should-i-use-with-raspberry-pi-3)  
+~~~
+$ bash Miniconda3-latest-Linux-armv7l.sh
+~~~
+## Miniconda Hot Reference
 It is Miniconda's command 
-* export : 
+
+* Export : 
 ~~~
-$ conda env export > (export_name).yaml
+$ conda env export > (EXPORT_NAME).yaml
 ~~~
-* inport : 
+* Inport : 
 ~~~
-$ conda env create -f (export_name).yaml
+$ conda env create -f (EXPORT_NAME).yaml
 ~~~
-* deleat:
+* Deleat :
 ~~~
-$ conda env remove -n ENVIRONMENT
+$ conda env remove -n (EXPORT_NAME)
 ~~~
 
 ## Library Install
-* pyaudio
-* twitter
+*pyaudio* is cannot install by normal pip
 ~~~
 $ sudo apt-get install portaudio19-dev
 $ pip install pyaudio
-
-$ pip install python-twitter
-$ pip install tweepy
 ~~~
-
+------------
 ## OpenJtalk Install
 [参考にしたサイト](http://shokai.org/blog/archives/6893)  
 ~~~
@@ -55,14 +85,13 @@ $ sudo apt-get install open-jtalk open-jtalk-mecab-naist-jdic htsengine libhtsen
 ~~~
 
 ## OpenJTalk VoiceData Setting
-Using OpenJTalk version handle hts-voice.  
-**Do not use mei's voice files**  
-  
-It is test code
+**Using OpenJTalk version handle hts-voice.**  
+**Do not use Mei's voice files.**  
+Your OpenJtalk version is not support Mei's voice file  
 ~~~
-$ cp ./etcs/Miku_A/ /usr/share/hts-voice/
+$ sudo cp -r InfoMaid/etcs/Miku_A/ /usr/share/hts-voice/
 ~~~
-
+------------
 ## ライブラリのインストール
 ~~~
 $ sudo apt-get install alsa-utils sox libsox-fmt-all
@@ -78,8 +107,8 @@ Bus 001 Device 002: ID 0424:9514 Standard Microsystems Corp. SMC9514 Hub
 Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
 ~~~
 
-## オーディオモジュールの設定
-### 優先順位の確認
+# オーディオモジュールの設定
+## 優先順位の確認
 以下のコマンドで確認できる。  
 名前の前に出てくる数字が優先順位で、snd_usb_audioを最優先にしたい。  
 おそらく、初めは以下のようにUSBマイクの方が優先順位が低くなっている。
@@ -89,7 +118,7 @@ $ cat /proc/asound/modules
  1 snd_usb_audio
 ~~~
 
-### 優先順位の書き換え
+## 優先順位の書き換え
 下記のように設定を変更する。  
 この**alsa_base.confが存在しない場合は、新しく作る**。ソースは[ここ](https://qiita.com/kinpira/items/75513eaab6eed19da9a3)。
 ~~~
@@ -99,7 +128,7 @@ options snd_usb_audio index=0
 options snd_bcm2835 index=1
 ~~~
 
-### 再度、優先順位の確認
+## 再度、優先順位の確認
 一度**再起動**してから、再度オーディオモジュールの優先順位を確認する。
 ~~~
 $ cat /proc/asound/modules
@@ -108,18 +137,9 @@ $ cat /proc/asound/modules
 ~~~
 こんな風に優先順位が変わっているはず
 
-## マイクの設定
+# マイクの設定
 [参考にしたサイト](https://qiita.com/t_oginogin/items/f0ba9d2eb622c05558f4)
-### マイクのカード番号を確認
-~~~
-$ arecord -l
-**** ハードウェアデバイス CAPTURE のリスト ****
-カード 0: Microphone [USB Microphone], デバイス 0: USB Audio [USB Audio]
-  サブデバイス: 1/1
-  サブデバイス #0: subdevice #0
-~~~
-
-### マイクの音量調整
+## マイクの音量調整
 マイクのボリュームの設定コマンドです。  
  ~~~ -c 0 ~~~ ではさっき調べたカード番号を入れます。
 ここで使っている ~~~ 40 ~~~ というのはボリュームで、最小0で最大は62です。
@@ -127,13 +147,12 @@ $ arecord -l
 $ amixer sset Mic 40 -c 0
 ~~~
 
-### マイクが生きているかを確かめる
+## マイクが生きているかを確かめる
 ~~~
 $ speaker-test -t sine -f 600
 ~~~
-
-### マイクで録音してみる(動作の確認)
-以下のコマンドで、カード:0のデバイス:0を使えばいいことが分かります。
+## マイクのカード番号、デバイス番号を確認
+この場合はカード:0のデバイス:0を使えばいい
 ~~~
 $ arecord -l
 **** ハードウェアデバイス CAPTURE のリスト ****
@@ -141,15 +160,18 @@ $ arecord -l
   サブデバイス: 1/1
   サブデバイス #0: subdevice #0
 ~~~
-この ~~~ 0,0 ~~~ でカード,デバイスを指定してます。
+
+## 録音
+0,0でカード,デバイスを指定しています。
 ~~~
 $ arecord -D plughw:0,0 test.wav
 ~~~
-### 録音したものを再生する
+## 録音したものを再生する
 ~~~
 aplay test.wav
 ~~~
-#### うまく再生されなかったとき
+ここまでうまくいけば、マイクの設定はOK
+## うまく再生されなかったとき
 以下のコマンドで、デバイスを確認します。  
 カード:1のデバイス:1はHDMIなので、これは違うようです。  
 カード:1のデバイス:0を使えばいいことが分かります。
@@ -170,12 +192,12 @@ $ aplay -l
     サブデバイス: 1/1
     サブデバイス #0: subdevice #0
 ~~~
-そして、上記のコマンドから分かったカードとデバイスを使って、
+上記のコマンドから分かったカード番号とデバイス番号を使って、
 ~~~
 $ aplay -Dhw:1,0 test.wav
 ~~~
-## Julius
-### Install
+# Julius
+## Install
 * [Julius](http://julius.osdn.jp/)のソースコードからコンパイル
 ~~~
 $ wget --trust-server-names 'http://osdn.jp/frs/redir.php?m=iij&f=%2Fjulius%2F60273%2Fjulius-4.3.1.tar.gz'
