@@ -1,4 +1,4 @@
-name: 3.4_neo
+name: maid
 dependencies:
 - libxml2=2.9.2=0
 - libxslt=1.1.28=0
