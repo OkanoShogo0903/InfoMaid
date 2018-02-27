@@ -14,9 +14,9 @@ GPIO.setup(SENSOR_PORT, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # 使用者は毎日家に帰ってくるとする
 class Status(Enum):
-    sleep = 0 # 寝てる
-    home = 1 # 家で起きて活動している
-    leave = 2 # 家にいない
+    sleep = 1 # 寝てる
+    home = 2 # 家で起きて活動している
+    leave = 3 # 家にいない
 
 def deinit():
     GPIO.cleanup()
@@ -38,18 +38,18 @@ def sencer_thread():
     motion_rate_long = 1.0 * motion_queue.count(1) / len(motion_queue)
     motion_rate_short = 1.0 * (motion_queue[:short_valid_time]).count(1) / len(motion_queue[:short_valid_time])
 
-    if status == status.sleep:
+    if status == Status.sleep:
         if motion_rate_short >= 0.4: # 朝起きたと判断する条件
-            status = status.home
+            status = Status.home
             # ~~~ ここが起きたタイミング！！！ ~~~
 
-    elif status == status.home:
+    elif status == Status.home:
         if motion_rate_long <= 0.05: # 外出したと判断する条件
-            status = status.leave
+            status = Status.leave
 
-    elif status == status.leave:
+    elif status == Status.leave:
         if motion_rate_short >= 0.2: # 帰ってきたと判断する条件
-            status = status.home
+            status = Status.home
             # ~~~ ここが帰ってきたタイミング！！！ ~~~
 
     # センサーのデータ取得

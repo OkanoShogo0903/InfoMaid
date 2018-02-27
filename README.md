@@ -207,6 +207,7 @@ $ aplay -Dhw:1,0 test.wav
 ## Install
 * [Julius](http://julius.osdn.jp/)のソースコードからコンパイル
 ~~~
+$ cd
 $ wget --trust-server-names 'http://osdn.jp/frs/redir.php?m=iij&f=%2Fjulius%2F60273%2Fjulius-4.3.1.tar.gz'
 $ tar xvzf julius-4.3.1.tar.gz
 $ cd julius-4.3.1/
