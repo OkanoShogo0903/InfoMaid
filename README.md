@@ -20,6 +20,7 @@
   動作環境 Windows 7/8/8.1/10 32/64bit ---> 死亡
 
 * ソースコード部分の表示はQiitaではもっとかっこよく背景青っぽくなっているので、それにしたい
+* センサをどのピンに繋いでいるかを写真でとりたい
 ------------
 # RaspberryPi SetUp
 * Internet Activate 
@@ -225,5 +226,12 @@ $ tar xvzf dictation-kit-v4.3.1-linux.tgz
 ~~~
 $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
 ~~~
+------------
+# Sencer
+## MotionSencer
+※GPIO17のピン番号は11
+|ground|vcc|out|
+|:-:|:-:|:-:|
+|06|01|11|
 ------------
 # Using

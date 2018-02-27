@@ -35,6 +35,8 @@ def sencer_thread():
 
     # 小数点以下が欲しいので、1.0を掛けている
     # 人感センサの反応した割合 = (1の個数/全体の個数)*100
+    # TODO motion_queue.count(x)では、60*60で3600回処理しているので、スレッドで回すなら処理数を下げるか？ → 速度図ってから → そんなにかかってない
+    
     motion_rate_long = 1.0 * motion_queue.count(1) / len(motion_queue)
     motion_rate_short = 1.0 * (motion_queue[:short_valid_time]).count(1) / len(motion_queue[:short_valid_time])
 
@@ -60,6 +62,7 @@ def sencer_thread():
         print("SENCER hit rate long  : {}".format(motion_rate_long))
         print("SENCER hit rate short : {}".format(motion_rate_short))
         print("SENCER status name    : {}".format(status))
+    print("SENCER active count in one hour : {}".format(motion_queue.count(1)))
 
     t = threading.Timer(1,sencer_thread) # x秒毎でサンプリング
     t.start()
