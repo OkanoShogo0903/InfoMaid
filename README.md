@@ -229,9 +229,16 @@ $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-k
 ------------
 # Sencer
 ## MotionSencer
-GPIO17のピン番号は11なので注意
+GPIO17のピン番号は11なので注意  
+
 |ground|vcc|out|
 |:-:|:-:|:-:|
 |06|01|11|
+
+  
+名前|罪状|謝罪|罪
+-|--|-|-
+銀髪ちゃん|廊下で接触。肩ぶつかる。|なし|★
+お菓子ちゃん|会合をサボる。**累計裏切り回数50回達成**|あり|★★★
 ------------
 # Using
