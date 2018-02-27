@@ -76,6 +76,8 @@ $ conda env remove -n (EXPORT_NAME)
 ~~~
 $ sudo apt-get install portaudio19-dev
 $ pip install pyaudio
+
+$ pip install RPi.GPIO
 ~~~
 ------------
 ## OpenJtalk Install
