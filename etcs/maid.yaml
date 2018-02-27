@@ -1,4 +1,4 @@
-name: '3.4'
+name: 3.4_neo
 dependencies:
 - libxml2=2.9.2=0
 - libxslt=1.1.28=0
@@ -7,7 +7,6 @@ dependencies:
 - pip=7.1.2=py34_0
 - python=3.4.3=1
 - requests=2.7.0=py34_0
-- rpi.gpio=0.5.11=py34_0
 - setuptools=18.1=py34_0
 - sqlite=3.8.4.1=1
 - wheel=0.24.0=py34_0
@@ -25,6 +24,7 @@ dependencies:
   - pyaudio==0.2.11
   - python-twitter==3.3
   - requests-oauthlib==0.8.0
+  - rpi.gpio==0.6.3
   - six==1.11.0
   - tweepy==3.5.0
   - urllib3==1.22
