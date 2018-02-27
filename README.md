@@ -148,9 +148,8 @@ $ cat /proc/asound/modules
 # マイクの設定
 [参考にしたサイト](https://qiita.com/t_oginogin/items/f0ba9d2eb622c05558f4)
 ## マイクの音量調整
-マイクのボリュームの設定コマンドです。  
- ~~~ -c 0 ~~~ ではさっき調べたカード番号を入れます。
-ここで使っている ~~~ 40 ~~~ というのはボリュームで、最小0で最大は62です。
+-c 0ではさっき調べたカード番号を入れます。
+40というのはボリュームで、0から62を入れれます。
 ~~~
 $ amixer sset Mic 40 -c 0
 ~~~
@@ -222,14 +221,15 @@ $ cd ~/julius-kits
 $ wget --trust-server-names 'http://osdn.jp/frs/redir.php?m=iij&f=%2Fjulius%2F60416%2Fdictation-kit-v4.3.1-linux.tgz'
 $ tar xvzf dictation-kit-v4.3.1-linux.tgz
 ~~~
-* Juliusの実行(plughw:0,0はマイクのカードとデバイスの番号)
+* Juliusの実行
+plughw:0,0はマイクのカードとデバイスの番号に合わせる
 ~~~
 $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
 ~~~
 ------------
 # Sencer
 ## MotionSencer
-※GPIO17のピン番号は11
+GPIO17のピン番号は11なので注意
 |ground|vcc|out|
 |:-:|:-:|:-:|
 |06|01|11|
