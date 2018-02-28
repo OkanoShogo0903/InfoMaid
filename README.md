@@ -204,6 +204,17 @@ $ aplay -l
 $ aplay -Dhw:1,0 test.wav
 ~~~
 # Julius
+Juliusについての説明・注意事項
+* **ここではv4.3.1をダウンロードしているが、ウェブの情報はv4.2.3が多い。 
+違うヴァージョンの記事では起動すら危ういので注意**
+* **grammar-kit-v4.1 及び julius-4.3.1/gramtools/mkdfa/ に付属している mkdfa.pl（から参照されるmkfa） は正常に動作しないので、julius ディレクトリ内にある対応版の mkfa を利用する必要がある。**
+* Julius4からJulianと統合された。
+* Juliusは言語モデルと音響モデルから最尤を出すエンジンなので、識精度は使用するモデルによって大きく変化する。
+(Juliusが日常会話で認識精度が低いのは、Julius標準のモデルの問題)
+* Julius-4.4より音響モデルでDNN-HMMを使用可能。
+* 言語モデルはNNを未サポート。
+* モジュールモードで動かせばTCP/IPで通信できる。
+
 ## Install
 * [Julius](http://julius.osdn.jp/)のソースコードからコンパイル
 ~~~
@@ -213,6 +224,7 @@ $ tar xvzf julius-4.3.1.tar.gz
 $ cd julius-4.3.1/
 $ ./configure
 $ make
+#$ sudo make install
 ~~~
 * ディクテーションファイル
 ~~~
@@ -226,17 +238,64 @@ plughw:0,0はマイクのカードとデバイスの番号に合わせる
 ~~~
 $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
 ~~~
+* 起動時のオプション
+[リファレンス・マニュアル(公式)](https://julius.osdn.jp/juliusbook/ja/julius.html)
+
+## Juliusについてのメモ
+ファイルの役割について  
+Juliusはjulianが後から統合された流れもあってか、ファイル構成が複雑  
+* grammar-kit-4.3.1
+	文法
+* julius-4.3.1
+	julius本体、ソースコードからコンパイルしたもの
+* julius-kits --- dictation-kit-v4.3.1-linux
+	音声認識用モデル
+* *.grammar : 文法規則  
+* *.voca : 語彙辞書  
+
+* 音響モデル
+	HMM(隠れ,マルコフ,モデル)が主流で、JuliusでもHMMに対応している。  
+	うまく音声認識をさせたいのならば、話者の性別や癖、喋っている場所が室内であるか屋外であるかなどの音響的特徴を反映した音響モデルが有償で販売されている。  
+	自分で音響モデルを作るためのツールキットにHTKというものがあるが、言語モデル以上に膨大な専門的知識が必要になるのでオススメできない。  
+	* [Kaldi](https://qiita.com/nina_rumor/items/f5aca2aea404a0f19fd1)(カルディ)
+		C++で書かれたツールキット  
+		日本語のドキュメントがない  
+		NNを使える音声認識ツールキット。
+	* CSJ
+		日本語話し言葉コーパス( Corpus of Spontaneous Japanese : CSJ )  
+		国立機関が日本語の発音を大量に集めた研究用のデータベースで、利用には申請が必要。  
+		学術研究飲みの場合、研究機関50k、学生2.5k。  
+* 言語モデル
+	単語辞書と単語間の接続によって、接続された単語の音を示す。  
+	* SRILM
+		N-gram言語モデルの自作ツール。これは公開されており、学校機関なら無償利用できる。
+* [辞書について](http://feijoa.jp/laboratory/raspberrypi/julius442/)
+* コマンド例
+~~~
+julius -C main.jconf -C am-gmm.jconf -demo
+julius -C ~/grammar-kit-4.3.1/hmm_mono.jconf -input mic -gram kaden -nostrip
+
+動かない
+ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/hmm_mono.jconf -gram greeting -nostrip 
+
+動く
+ALSADEV="plughw:1,0" julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
+
+~~~
+
 ## Juliusの評価
-いやこのコンパイラはいかれてるでしょ
-README読んだじゃん！
+いやこのコンパイラはいかれてるでしょ。
+READMEの指示通りにやってもエラー吐きます。
+README読んだじゃん！README読んだじゃん！
+
 ------------
 # Sencer
 ## MotionSencer
 GPIO17のピン番号は11なので注意  
 
-|ground|vcc|out|
+|vcc|ground|out|
 |:-:|:-:|:-:|
-|  06  |  01  |  11  |
+|  01  |  06  |  11  |
 
 ------------
 # Using
