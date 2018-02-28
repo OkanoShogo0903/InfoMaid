@@ -226,6 +226,9 @@ plughw:0,0はマイクのカードとデバイスの番号に合わせる
 ~~~
 $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
 ~~~
+## Juliusの評価
+いやこのコンパイラはいかれてるでしょ
+README読んだじゃん！
 ------------
 # Sencer
 ## MotionSencer
