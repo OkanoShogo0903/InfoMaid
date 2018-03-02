@@ -276,10 +276,13 @@ julius -C main.jconf -C am-gmm.jconf -demo
 julius -C ~/grammar-kit-4.3.1/hmm_mono.jconf -input mic -gram kaden -nostrip
 
 動かない
-ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/hmm_mono.jconf -gram greeting -nostrip 
+1. ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/hmm_mono.jconf -gram greeting -nostrip 
 
 動く
-ALSADEV="plughw:1,0" julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
+1. ALSADEV="plughw:1,0" julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
+1. ALSADEV="plughw:1,0" julius -C ~/grammar-kic.jconf -nostrip
+
+恐ろしいことに、EUC-JPkらUTF-8に変えると内部エラー起こす。どうしろっていうねん。
 
 ~~~
 
