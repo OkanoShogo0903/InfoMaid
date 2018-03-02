@@ -9,6 +9,7 @@ def say_datetime():
     # 現在の日付を出力する
     d = datetime.now()
     text = '%s月%s日、%s時%s分%s秒' % (d.month, d.day, d.hour, d.minute, d.second)
+    # この行いらなくない？？
     text = CMD_SAY + ' ' + text
     jtalk(text)
     return
