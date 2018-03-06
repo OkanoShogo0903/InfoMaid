@@ -278,12 +278,37 @@ julius -C ~/grammar-kit-4.3.1/hmm_mono.jconf -input mic -gram kaden -nostrip
 動かない
 1. ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/hmm_mono.jconf -gram greeting -nostrip 
 
-動く
+書き取りモードで動かす
 1. ALSADEV="plughw:1,0" julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
-1. ALSADEV="plughw:1,0" julius -C ~/grammar-kic.jconf -nostrip
+no
 
-恐ろしいことに、EUC-JPkらUTF-8に変えると内部エラー起こす。どうしろっていうねん。
+モジュールモードで動かす(ALSAの指定が後ろだとうまく動作しない)
+1. julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module ALSADEV="plughw:1,0" 
+モジュールモードで動かす
+1. ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module
 
+恐ろしいことに、-charconv EUC-JP UTF-8をすると内部エラー起こす。どうしろっていうねん。
+
+  目標と方針
+1. UCとバジリスクとアメリカのディスコっぽい曲をかける
+	1. 辞書登録
+	1. xmlのパース
+	1. EUC-JPの文字化けを直す
+	1. 音声の入手
+	1. 音声を流す処理
+2. プログラムからjuliusの起動と終了をシェルコマンドで操作する
+	2. ALSAのデバイス設定コマンドがなくても動くようにする
+	2. jconfの設定ファイルを参照してjuliusが動くようにする(https://qiita.com/kouichirou/items/5e9f80f46f6137d2926b)
+	2. プログラムを書く
+
+* なぜこんなにもJuliusまわりはつらいのか
+	まずJuliusが分からない。ヴァージョンの問題があるため、web資料が信用できない。
+	xmlのパース方法が分からない。
+	ソケット間通信が分からない。
+	UTF-8に直さないと。
+	* Julius
+	* XML
+	* Socket
 ~~~
 
 ## Juliusの評価
