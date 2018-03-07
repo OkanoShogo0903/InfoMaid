@@ -49,7 +49,9 @@ static domain_name_servers=210.196.228.210 210.196.3.183
 $ sudo apt-get install ibus-anthy
 ~~~
 * Vim
+~~~
 $ sudo apt-get install vim
+~~~
 * Git
 ~~~
 $ sudo apt-get install git
@@ -286,6 +288,7 @@ no
 1. julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module ALSADEV="plughw:1,0" 
 モジュールモードで動かす
 1. ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module
+~~~
 
 恐ろしいことに、-charconv EUC-JP UTF-8をすると内部エラー起こす。どうしろっていうねん。
 
@@ -309,7 +312,6 @@ no
 	* Julius
 	* XML
 	* Socket
-~~~
 
 ## Juliusの評価
 いやこのコンパイラはいかれてるでしょ。
