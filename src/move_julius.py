@@ -94,7 +94,7 @@ def main():
                 # xml = '<?xml version="1.0"?>\n' + data[data.find("<RECOGOUT>"):]
                 try:
                     xml = data[data.find("<RECOGOUT>"):]
-                    xml = xml.replace("\\n.\\n\'","")
+                    xml = xml.replace("\\n.\\n\'","") # \nを消さないとxmlからパースできないため
                     xml = xml.replace("\\n","")
                     xml = xml.replace("'b'","")
                     
@@ -104,18 +104,27 @@ def main():
                     dict_ = xmltodict.parse(xml)
                     print(json.dumps(dict_,indent=2))
                     for word in dict_['RECOGOUT']['SHYPO']['WHYPO']:
-                        print(word)
+                        print(word['@WORD'].replace("\\\\","\\").decode('utf-8'))
 
                     """
                     <RECOGOUT>\n  <SHYPO RANK="1" SCORE="-2302.836426" GRAM="0">\n    <WHYPO WORD="[s]" CLASSID="4" PHONE="silB" CM="1.000"/>\n    <WHYPO WORD="\xe3\x81\x8a\xe3\x81\xaf\xe3\x82\x88\xe3\x81\x86" CLASSID="0" PHONE="o h a y o u" CM="0.902"/>\n    <WHYPO WORD="[/s]" CLASSID="5" PHONE="silE" CM="0.755"/>\n  </SHYPO>\n</RECOGOUT>\n.\n'
                     """
                     """
+                    # どうも[s]の場合と<s>の場合があって、<s>は通らないらしい
                     <RECOGOUT>  <SHYPO RANK="1" SCORE="-1886.061279" GRAM="1">    <WHYPO WORD="<s>" CLASSID="7" PHONE="silB" CM="1.000"/>    <WHYPO WORD="\x82\xd4\x82\xc7\x82\xa4" CLASSID="0" PHONE="b u d o:" CM="0.614"/>    <WHYPO WORD="\x82\xc5\x82\xb7" CLASSID="6" PHONE="d e s u" CM="1.000"/>    <WHYPO WORD="</s>" CLASSID="8" PHONE="silE" CM="0.976"/>  </SHYPO></RECOGOUT>
+                    """
+                    """
+                    # 送られてきたものは
+                    \xe3\x81\x8a\xe3\x81\xaf\xe3\x82\x88\xe3\x81\x86
+                    # これをxmltodictに通すと、\が\\に置換されている。気持ち悪い。
+                    \\xe3\\x81\\x8a\\xe3\\x81\\xaf\\xe3\\x82\\x88\\xe3\\x81\\x86
+                    # 根本的な理由は、juliusから渡されるデータがutf-8にエンコードされていないと言うことなので、
+                    # 次回からjuliusをプログラム上から起動する方法を試していくことにする
                     """
 
                 except ExpatError as err:
-                    print("ErrorCode   :", errors.messages[err.code])
-                    print("ErrorLineno :", errors.messages[err.lineno])
+                    print("ErrorCode    :", errors.messages[err.code])
+                    print("ErrorLineNum :", errors.messages[err.lineno])
 
                 # 言葉を判別してどうこうするコードをここに書く
                 data = ""
