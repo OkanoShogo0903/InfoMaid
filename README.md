@@ -226,7 +226,10 @@ $ tar xvzf julius-4.3.1.tar.gz
 $ cd julius-4.3.1/
 $ ./configure
 $ make
+
 #$ sudo make install
+$ vim .bash_profile
+export ALSADEV="plughw:1,0"
 ~~~
 * ディクテーションファイル
 ~~~
@@ -274,9 +277,6 @@ Juliusはjulianが後から統合された流れもあってか、ファイル�
 * [辞書について](http://feijoa.jp/laboratory/raspberrypi/julius442/)
 * コマンド例
 ~~~
-julius -C main.jconf -C am-gmm.jconf -demo
-julius -C ~/grammar-kit-4.3.1/hmm_mono.jconf -input mic -gram kaden -nostrip
-
 動かない
 1. ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/hmm_mono.jconf -gram greeting -nostrip 
 
@@ -288,6 +288,10 @@ no
 1. julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module ALSADEV="plughw:1,0" 
 モジュールモードで動かす
 1. ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module
+環境変数を設定済みの時に、モジュールモードで動かす
+1. julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module
+
+本来はcat /proc/asound/modulesでの優先順位を変えるために/etc/modprobe.d/alsa-base.confでusbマイクの設定をコメントアウトするが、ラズパイではalsa-base.confは無いため代わりにexport ALSADEV="plughw:1,0"とかして環境変数を設定して優先順位を変える必要がある
 ~~~
 
 恐ろしいことに、-charconv EUC-JP UTF-8をすると内部エラー起こす。どうしろっていうねん。
@@ -307,7 +311,7 @@ no
 * なぜこんなにもJuliusまわりはつらいのか
 	まずJuliusが分からない。ヴァージョンの問題があるため、web資料が信用できない。
 	xmlのパース方法が分からない。
-	ソケット間通信が分からない。
+	ソケット間通信が分からない。ここにもヴァージョンの壁？
 	UTF-8に直さないと。
 	* Julius
 	* XML
