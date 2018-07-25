@@ -1,6 +1,14 @@
 import time
 import wave
 import pyaudio
+
+AUDIO_URL = "../etcs/Audio/"
+
+def play_init_voice():
+    url = AUDIO_URL + "Init/init_voice.wav"
+    audio.play(url)
+
+
 def play(url):
     wavfile = url
 

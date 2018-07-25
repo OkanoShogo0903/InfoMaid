@@ -4,20 +4,34 @@ import json
 import requests
 from bs4 import BeautifulSoup
 import jtalk
+import common_function as common
 
 class WeatherData:
-    """ class of weather data and functions """
+    """
+        class of weather data and functions
+        外部から呼び出される関数:
+            say_weather(_say_range=1)
+    """
     def __init__(self):
         # シングルトンで書くと綺麗では？？
+        self.url = "http://weather.livedoor.com/forecast/webservice/json/v1?city=170010"
         # 天気データの取得
         self.get_weather_data()
 
+
+    def __enter__(self):
+        # withステートメントで処理するための記述
+        return self
+
+
+    def __exit__(self, type, value, traceback):
+        pass
+
+
     def get_weather_data(self):
     # 内容：天気に関するデータをweatherhackのAPIから手に入れる
-        print("get_weather_data : start")
         # jsonデータを取ってくる
-        url = "http://weather.livedoor.com/forecast/webservice/json/v1?city=170010"
-        resp = requests.get(url)
+        resp = requests.get(self.url)
         # print(resp.text)
 
         json_dict = json.loads(resp.text)
@@ -40,26 +54,28 @@ class WeatherData:
         self.forecasts = json_dict['forecasts']
 
         # コピーライトについて
-        print("@copyright")
-        print(json_dict['copyright']['title'])
-        print(json_dict['copyright']['provider'])
+        #print("@copyright")
+        #print(json_dict['copyright']['title'])
+        #print(json_dict['copyright']['provider'])
 
         # 一時間ごとにデータを更新するために１時間後に呼び出す
-        t=threading.Timer(60*60,self.get_weather_data)
-        t.start()
-        print("get_weather_data : end")
-        print()
+        #print("get_weather_data : end")
 
-    def say(self,say_range_):
-    # 内容：天気と気温を読み上げる
-    # TODO 語尾や言い方にバリエーションを持たせるような造り込みがあるとおもしろい
+
+    def say_weather(self, _say_range):
+        ''' 
+            機能：天気と気温を読み上げる
+
+            TODO : 
+            語尾や言い方にバリエーションを持たせるような造り込みがあるとおもしろい
+        '''
         
         jtalk.jtalk("本日の" + self.city + "の天気をお伝えします")
 
         # 天気情報はスラスラ読み上げた方が秘書っぽい感じがしていいので、連続して読み上げさせる
         try:
             say_text = ""
-            for data in self.forecasts[:say_range_]:
+            for data in self.forecasts[:_say_range]:
                 # 「~最低気温不明、明日の~」の、『、』をつけるための処理
                 # say_textになにかが入っていたら、をつける
                 if say_text:
@@ -80,13 +96,25 @@ class WeatherData:
                 say_text += "です"
                 jtalk.jtalk(say_text)
         except:
-            err_txt = "天気についてのエラーが発生しています"
+            err_txt = "天気についての予期せぬエラーが発生しました"
             print(err_txt)
             jtalk.jtalk(err_txt)
             
 #        jtalk.jtalk(self.description)
+
 #------------------------------------------------------
-# 外から呼び出される時のサンプル
+def main():
+    ''' 外から呼び出される時のサンプル '''
+    with weatherData() as weather:
+        weather.say_weather(_say_range=1)
+        while 1:
+            weather.get_weather_data()
+            time.sleep(60*60) # renew weather data per 1hour
+
+t_name = os.path.basename(__file__) + " : weather"
+thread = threading.Thread(target=main, name=t_name)
+thread.setDaemon(True)
+thread.start()
 if __name__=="__main__":
-    weather = WeatherData()
-    weather.say(1)
+    time.sleep(60) # for debug
+

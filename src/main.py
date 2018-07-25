@@ -8,31 +8,26 @@ import threading
 import random
 import os
 
+import move_julius
+import common_function as common
 import audio
-import clock_func
-import jtalk
-import filer
-import weather
-import news as news_file
-AUDIO_URL = "../etcs/Audio/"
+#import clock_func
+#import jtalk
+#import filer
+#import weather
+#import news as news_file
 
-a = datetime.now()
-wea = weather.WeatherData()
+#a = datetime.now()
+#wea = weather.WeatherData()
 # main function
 def main():
+    play_init_voice()
+
     if 0:
-        print ("boice timer active")
+        #print ("boice timer active")
         print (datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
         print (os.getcwd())
         print ("\n")
-
-        url = AUDIO_URL + "Init/init_voice.wav"
-        audio.play(url)
-
-    # とりあえず時間しゃべらせとく
-        b = datetime.now()
-        say_text = str(b.hour%12) + '時' + str(b.minute) + "分です"
-        jtalk.jtalk(say_text)
 
     # 天気しゃべらす
     wea.say(2)
@@ -41,9 +36,8 @@ def main():
     new = news_file.NewsClass()
     new.say_news("ねとらぼ",1)
 
-# threads start
-    t=threading.Timer(1,clock_func.clock)
-    t.start()
 
 if __name__=="__main__":
-    main()
+    #main()
+    time.sleep(1000)
+    pass
