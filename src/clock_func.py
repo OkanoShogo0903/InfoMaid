@@ -15,7 +15,7 @@ url_evening     = audio.AUDIO_URL + "other/evening"
 url_morning     = audio.AUDIO_URL + "other/morning"
 url_daytime     = audio.AUDIO_URL + "other/daytime"
 
-def specific_time(now):
+def specificTime(now):
     ''' 行事などがあったときのつぶやき '''
 
     '''
@@ -35,7 +35,7 @@ def specific_time(now):
 #*/
 
 
-def time_signal(now):
+def timeSignal(now):
     ''' 呼ばれると現在のhour,minuteを発音する '''
     # TODO wavファイルがないときは例外を投げるようにしたい
     audio.play( audio.AUDIO_URL + "Init/master.wav")
@@ -79,18 +79,21 @@ def mutter(now):
 
 
 def main():
-    while 1:
-        now = datetime.now()
+    try:
+        while 1:
+            now = datetime.now()
 
-        if now.minute%10 == 0:
-            time_signal(now)
-        elif random.randint(0,20) == 0:
-            # 60分に一回程度で特殊日時ボイスを出します
-            specific_time(now)
-        else:
-            mutter(now)
+            if now.minute%10 == 0:
+                timeSignal(now)
+            elif random.randint(0,20) == 0:
+                # 60分に一回程度で特殊日時ボイスを出します
+                specificTime(now)
+            else:
+                mutter(now)
 
-        time.sleep(60)
+            time.sleep(60)
+    except KeyboardInterrupt:
+        return
 
 
 t_name = os.path.basename(__file__) + " : clock"
@@ -98,4 +101,4 @@ thread = threading.Thread(target=main, name=t_name)
 thread.setDaemon(True)
 thread.start()
 if __name__=="__main__":
-    time.sleep(1000) # for debug
+    time.sleep(10000) # for debug

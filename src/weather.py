@@ -1,22 +1,31 @@
+import os
 import time
 import threading
 import json
 import requests
 from bs4 import BeautifulSoup
+#import Event
+#from threading import (Event, Thread)
+
 import jtalk
 import common_function as common
+import event_master as event
 
 class WeatherData:
     """
-        class of weather data and functions
-        外部から呼び出される関数:
-            say_weather(_say_range=1)
+        外部からweather_eventイベントを呼び出されると、
+        今日と明日の天気・気温を言う。
     """
+    URL = "http://weather.livedoor.com/forecast/webservice/json/v1?city=170010"
     def __init__(self):
         # シングルトンで書くと綺麗では？？
-        self.url = "http://weather.livedoor.com/forecast/webservice/json/v1?city=170010"
         # 天気データの取得
-        self.get_weather_data()
+        self.getWeatherData()
+
+        # 外部から呼び出される時のためのスレッドの作成
+        self.thread = threading.Thread(target=self.waitEventCall, name="WeatherEvent")
+        self.thread.setDaemon(True)
+        self.thread.start()
 
 
     def __enter__(self):
@@ -28,10 +37,19 @@ class WeatherData:
         pass
 
 
-    def get_weather_data(self):
+    def waitEventCall(self):
+        interval_sec = 60*60*3 # 3時間 ごとに更新
+        while 1:
+            while not event.weather_event.wait(interval_sec):
+                self.getWeatherData()
+            event.weather_event.clear()
+            self.sayWeather(_say_range=1)
+
+
+    def getWeatherData(self):
     # 内容：天気に関するデータをweatherhackのAPIから手に入れる
         # jsonデータを取ってくる
-        resp = requests.get(self.url)
+        resp = requests.get(self.URL)
         # print(resp.text)
 
         json_dict = json.loads(resp.text)
@@ -58,11 +76,10 @@ class WeatherData:
         #print(json_dict['copyright']['title'])
         #print(json_dict['copyright']['provider'])
 
-        # 一時間ごとにデータを更新するために１時間後に呼び出す
-        #print("get_weather_data : end")
+        #print("getWeatherData : end")
 
 
-    def say_weather(self, _say_range):
+    def sayWeather(self, _say_range):
         ''' 
             機能：天気と気温を読み上げる
 
@@ -97,24 +114,15 @@ class WeatherData:
                 jtalk.jtalk(say_text)
         except:
             err_txt = "天気についての予期せぬエラーが発生しました"
-            print(err_txt)
+            common.log(err_txt)
             jtalk.jtalk(err_txt)
             
-#        jtalk.jtalk(self.description)
+#        jtalk.jtalk(self.description) # 詳細
 
 #------------------------------------------------------
-def main():
-    ''' 外から呼び出される時のサンプル '''
-    with weatherData() as weather:
-        weather.say_weather(_say_range=1)
-        while 1:
-            weather.get_weather_data()
-            time.sleep(60*60) # renew weather data per 1hour
+WeatherData()
 
-t_name = os.path.basename(__file__) + " : weather"
-thread = threading.Thread(target=main, name=t_name)
-thread.setDaemon(True)
-thread.start()
 if __name__=="__main__":
-    time.sleep(60) # for debug
+    ''' 外から呼び出される時のサンプル '''
+    event.callWeather()
 

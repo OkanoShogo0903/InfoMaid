@@ -20,6 +20,7 @@ import json
 import pprint
 
 #import event_master
+import event_master as event
 import common_function as common
 
 class JuliusController(object):
@@ -45,7 +46,7 @@ class JuliusController(object):
             #self.julius.kill()
             pass
         while self.julius.poll() is None:
-            print ('INFO : wait for 0.1 sec julius\' termination')
+            #print ('INFO : wait for 0.1 sec julius\' termination')
             time.sleep(0.1)
         # ソケット通信のクライアントを閉じる
         self.deleteSocket(self.julius_socket)
@@ -67,7 +68,7 @@ class JuliusController(object):
 
 
     def invokeJulius(self):
-        print ('INFO : invoke julius')
+        common.log('INFO : invoke julius')
         #args = r'ALSADEV=\"plughw:1,0\" /usr/local/bin/julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module'
         #args = r'/usr/local/bin/julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module'
         #args = 'julius -C ~/grammar-kit-4.3.1/testmic.jconf -nostrip -module' # 辞書なし版
@@ -84,7 +85,7 @@ class JuliusController(object):
                 shell=True
             )
         time.sleep(2.0) # Juliusの起動待ち
-        print ('INFO : invoke julius complete')
+        #common.log('INFO : invoke julius complete')
         return p
 
 
@@ -98,13 +99,13 @@ class JuliusController(object):
             # TCPサーバー接続の初期化
             s.connect(('localhost', 10500))
         except:
-            print("ERRER :ソケット接続のエラーが発生したため終了します") # ERR 111
+            common.log("ERRER :ソケット接続のエラーが発生したため終了します") # ERR 111
             import traceback
             traceback.print_exc()
 
             stdout_data, stderr_data = julius.communicate(timeout=2) # sec
-            print ("communicate out : ",stdout_data)
-            print ("communicate err : ",stderr_data)
+            common.log("communicate out : ",stdout_data)
+            common.log("communicate err : ",stderr_data)
 
             sys.exit(0)
 
@@ -116,7 +117,6 @@ class JuliusController(object):
 
     def operate(self):
         # サーバからのデータ受信
-        print("データ受信を開始します")
         data = ""
         while True:
             #time.sleep(0.1)
@@ -126,15 +126,15 @@ class JuliusController(object):
                 # UnicodeDecodeError: 'utf-8' codec can't decode byte 0x82 in position 126: invalid start byte
                 data = data + self.julius_socket.recv(self.BUFSIZE).decode('utf-8')
                 #data = data + julius_socket.recv(BUFSIZE).encode('utf-8')
-                print ('[utf-8 decode]')
+                #print ('[utf-8 decode]')
             
             #except UnicodeDecodeError:
             #    data = data + julius_socket.recv(BUFSIZE).decode('cp932')
             #    print ('[cp932 decode]')
 
             except ConnectionResetError:
-                print("ConnectionResetError")
-                #print("もう一回起動してください")
+                common.log("ConnectionResetError")
+                common.log("もう一回起動してください")
                 #sys.exit(0)
                 return -1
 
@@ -169,7 +169,7 @@ class JuliusController(object):
                         xml = xml.replace('</s>','[/s]')
 
                         dict_ = xmltodict.parse(xml) # raise ERR
-                        print(json.dumps(dict_,indent=2))
+                        common.log(json.dumps(dict_,indent=2))
 
                         for whypo in dict_['RECOGOUT']['SHYPO']['WHYPO']:
                             if whypo['@PHONE'] == 'silB':
@@ -178,15 +178,16 @@ class JuliusController(object):
                                 continue
                             else:
                                 input_word.append(whypo['@WORD']) # word type is <class 'str'>
-                    
+
                         # 言葉を判別してどうこうするコードをここに書く
+                        pprint(input_word)
                         for w in input_word:
-                            print("INPUT :",w)
-                            #foo.publish(w)
-                            speech_recog_publish(w)
+                            common.log(w)
+                            event.callSpeachRecog()
+                            #event.publishSpeachRecog(w)
                     except ExpatError as err:
-                        print("ErrorCode    :", errors.messages[err.code])
-                        print("ErrorLineNum :", errors.messages[err.lineno])
+                        common.log("ErrorCode    :", errors.messages[err.code])
+                        common.log("ErrorLineNum :", errors.messages[err.lineno])
 
                     data = ""
                 else:
@@ -207,12 +208,12 @@ def main():
                     state = 0
 
         except KeyboardInterrupt:
-            print("keyInterrupt Occured.")
+            return
 
 
 #common.thread_create( name=os.path.basename(__file__) + " main", target=main)
 #main()
-t_name = os.path.basename(__file__) + " : julius main"
+t_name = os.path.basename(__file__) + " : Julius"
 thread = threading.Thread(target=main, name=t_name)
 thread.setDaemon(True)
 thread.start()

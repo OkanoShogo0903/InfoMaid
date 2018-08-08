@@ -16,6 +16,7 @@ import time
 
 event = Event()
 speech_recog_event = Event()
+weather_event = Event()
 
 def event_example1():
     logger.info("スレッド開始")
@@ -23,15 +24,23 @@ def event_example1():
     logger.info("スレッド終了")
 
 
-def speech_recog_publish(word):
+def setSpeachRecog():
+    # speech recog
+    pass
+
+
+def callSpeachRecog():
     speech_recog_event.set()
 
 
+def callWeather():
+    weather_event.set()
+
+
 def publish(word):
+    pass
 #thread = Thread(target=event_example1)
 #thread.start()
 #time.sleep(3)
 #logger.info("イベント発生")
 #event.set()
-
-

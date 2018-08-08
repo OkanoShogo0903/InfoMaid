@@ -14,7 +14,8 @@ import audio
 #import clock_func
 #import jtalk
 #import filer
-#import weather
+import weather
+import event_master as event
 #import news as news_file
 
 #a = datetime.now()
@@ -39,5 +40,6 @@ def main():
 
 if __name__=="__main__":
     #main()
+    #event.callWeather()
     time.sleep(1000)
     pass
