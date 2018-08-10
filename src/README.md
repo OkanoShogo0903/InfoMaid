@@ -1,16 +1,17 @@
 ## 何のプログラムか
 - main
 [x] main.py
+[x] common_function
 
 - 共通部分
 	- 音声出力
 	[x] audio.py
-	[ ] filer.py
-	[ ] jtalk.py
+	[x] filer.py
+	[x] jtalk.py
 	- センサー
-	[ ] senser.py ---> pub
+	[x] senser.py ---> pub
 	- イベントを扱うところ
-	[ ] event_master
+	[x] event_master
 	- 自然言語処理
 	[ ] 	---> pub
 
@@ -33,8 +34,9 @@
 
 - other
 [ ] web_search.py
-[ ] 音声キュー、audioとjtalkの親
-jtalkはaudioに統合する
+[ ] AudioQueueの実装(audioとjtalkの親)
+	jtalkはaudioに統合する
+[ ] main.pyは<C-c>で落ちるようにして、他のスレッドはすべてデーモンにしてプログラム全体が<C-c>一発で落ちるようにする.
 
 # メモ
 - while1で回すと処理が重くなるから、スレッド処理で軽くしてあげたほうがいい？

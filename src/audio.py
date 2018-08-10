@@ -4,13 +4,13 @@ import pyaudio
 
 AUDIO_URL = "../etcs/Audio/"
 
-def play_init_voice():
+def playInitVoice():
     url = AUDIO_URL + "Init/init_voice.wav"
-    audio.play(url)
+    play(url)
 
 
-def play(url):
-    wavfile = url
+def play(_url):
+    wavfile = _url
 
     # WAVファイルを開く
     wf = wave.open(wavfile, "rb")

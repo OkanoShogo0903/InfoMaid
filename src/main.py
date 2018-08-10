@@ -8,21 +8,24 @@ import threading
 import random
 import os
 
-import move_julius
-import common_function as common
-import audio
-#import clock_func
 #import jtalk
 #import filer
-import weather
+import audio
+import senser
 import event_master as event
+import common_function as common
+
+import move_julius
+import clock_func
+import weather
+
 #import news as news_file
 
 #a = datetime.now()
 #wea = weather.WeatherData()
 # main function
 def main():
-    play_init_voice()
+    audio.playInitVoice()
 
     if 0:
         #print ("boice timer active")
@@ -39,7 +42,8 @@ def main():
 
 
 if __name__=="__main__":
+    audio.playInitVoice()
     #main()
     #event.callWeather()
-    time.sleep(1000)
+    time.sleep(10000)
     pass

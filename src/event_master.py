@@ -1,46 +1,52 @@
 # -*- coding: utf-8 -*-
-from logging import (getLogger, StreamHandler, INFO, Formatter)
-
-# ログの設定
-handler = StreamHandler()
-handler.setLevel(INFO)
-handler.setFormatter(Formatter("[%(asctime)s] [%(threadName)s] %(message)s"))
-logger = getLogger()
-logger.addHandler(handler)
-logger.setLevel(INFO)
-
-
 from threading import (Event, Thread)
 import time
+import sys
+import queue
 
+import common_function as common
 
 event = Event()
-speech_recog_event = Event()
-weather_event = Event()
-
-def event_example1():
-    logger.info("スレッド開始")
-    event.wait()
-    logger.info("スレッド終了")
+speech_recog_event  = Event()
+weather_event       = Event()
+wake_event          = Event()
+go_out_event        = Event()
+return_home_event   = Event()
 
 
-def setSpeachRecog():
-    # speech recog
-    pass
+# Sencer Event-------------->>>
+def callOwnerWake():
+    common.log(sys._getframe().f_code.co_name)
+    wake_event.set()
 
 
+def callOwnerGoOut():
+    common.log(sys._getframe().f_code.co_name)
+    go_out_event.set()
+
+
+def callOwnerReturnHome():
+    common.log(sys._getframe().f_code.co_name)
+    return_home_event.set()
+
+
+# Speech Recognition Event--->>>
 def callSpeachRecog():
+    common.log(sys._getframe().f_code.co_name)
     speech_recog_event.set()
 
 
+# Weather Event-------------->>>
 def callWeather():
+    common.log(sys._getframe().f_code.co_name)
     weather_event.set()
+
+
+speech_queue = queue.Queue()
+def publishSpeachRecog(_word):
+    common.log(sys._getframe().f_code.co_name)
+    speech_queue.put(_word)
 
 
 def publish(word):
     pass
-#thread = Thread(target=event_example1)
-#thread.start()
-#time.sleep(3)
-#logger.info("イベント発生")
-#event.set()

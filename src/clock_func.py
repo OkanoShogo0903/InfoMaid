@@ -9,11 +9,20 @@ import jtalk
 import filer
 import day_list
 import common_function as common
+import event_master as event
 
 url_midnight    = audio.AUDIO_URL + "other/midnight"
 url_evening     = audio.AUDIO_URL + "other/evening"
 url_morning     = audio.AUDIO_URL + "other/morning"
 url_daytime     = audio.AUDIO_URL + "other/daytime"
+
+def waitSpeechRecog():
+    while 1:
+        event.speech_recog_event.wait()
+        event.speech_recog_event.clear() # TODO みんなが参照するものをクリアするのはよくなくね???
+        now = datetime.now()
+        timeSignal(now)
+
 
 def specificTime(now):
     ''' 行事などがあったときのつぶやき '''
@@ -53,28 +62,28 @@ def mutter(now):
         if (rand_int % 3 == 0): 
             #print("真夜中")
             url = url_midnight
-            url = filer.GetFileName(url)
+            url = filer.getFileName(url)
             audio.play(url)
     elif 18 <= now.hour :
         # 夕方から夜にかけての場合の一般リアクション
         if (rand_int % 5 == 0):
             #print("夕方")
             url = url_evening
-            url = filer.GetFileName(url)
+            url = filer.getFileName(url)
             audio.play(url)
     elif 5 <= now.hour and now.hour <= 9 :
         # 朝の場合の一般リアクション
         if (rand_int % 5 == 0):
             #print("朝")
             url = url_morning
-            url = filer.GetFileName(url)
+            url = filer.getFileName(url)
             audio.play(url)
     else:
         # 昼の場合の一般リアクション
         if (rand_int % 6 == 0):
             #print("昼")
             url = url_daytime
-            url = filer.GetFileName(url)
+            url = filer.getFileName(url)
             audio.play(url)
 
 
@@ -96,9 +105,16 @@ def main():
         return
 
 
+# 外部から呼び出される時のためのスレッドの作成
+wait_thread = threading.Thread(target=waitSpeechRecog, name="clock wait")
+wait_thread.setDaemon(True)
+wait_thread.start()
+
+# main thread
 t_name = os.path.basename(__file__) + " : clock"
-thread = threading.Thread(target=main, name=t_name)
-thread.setDaemon(True)
-thread.start()
+clock_thread = threading.Thread(target=main, name=t_name)
+clock_thread.setDaemon(True)
+clock_thread.start()
+
 if __name__=="__main__":
     time.sleep(10000) # for debug

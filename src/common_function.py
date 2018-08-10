@@ -33,6 +33,6 @@ def startFunction(request):
             print (t)
 
 
-def log(string):
-    logger.info(string)
+def log(_string):
+    logger.info(_string)
 

@@ -337,6 +337,7 @@ README読んだじゃん！README読んだじゃん！
 ------------
 # Sencer
 ## MotionSencer
+[!image](./etcs/image/raspi-numbering.png)
 GPIO17のピン番号は11なので注意  
 
 |vcc|ground|out|
@@ -345,3 +346,51 @@ GPIO17のピン番号は11なので注意
 
 ------------
 # Using
+anacondaいれて、maid.yamlから環境をつくる
+source activate maid
+python main
+
+# hot memo
+~/julius-kits/dictation-kit-v4.3.1-linux 
+```
+"WHYPO": {
+"@WORD": "\u3058\u304b\u3093",
+"@CLASSID": "\u3058\u304b\u3093",
+"@PHONE": "silB j i k a N silE",
+"@CM": "0.980"
+}
+
+```
+
+
+```
+
+"WHYPO": [
+{
+"@WORD": "[s]",
+"@CLASSID": "7",
+"@PHONE": "silB",
+"@CM": "1.000"
+},
+{
+"@WORD": "\u871c\u67d1",
+"@CLASSID": "0",
+"@PHONE": "m i k a N",
+"@CM": "1.000"
+},
+{
+"@WORD": "\u3067\u3059",
+"@CLASSID": "6",
+"@PHONE": "d e s u",
+"@CM": "1.000"
+},
+{
+"@WORD": "[/s]",
+"@CLASSID": "8",
+"@PHONE": "silE",
+"@CM": "1.000"
+}
+]
+
+```
+
