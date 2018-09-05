@@ -1,15 +1,24 @@
 import time
 import wave
 import pyaudio
+import sched
+import time
+
+import jtalk 
 
 AUDIO_URL = "../etcs/Audio/"
 
 def playInitVoice():
     url = AUDIO_URL + "Init/init_voice.wav"
-    play(url)
+    #play(url)
+    jtalk.schedule.enter(delay=0, priority=1, action=callAudioFile, argument=(url,))
 
 
 def play(_url):
+    jtalk.schedule.enter(delay=0, priority=1, action=callAudioFile, argument=(_url,))
+
+
+def callAudioFile(_url):
     wavfile = _url
 
     # WAVファイルを開く

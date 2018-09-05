@@ -3,8 +3,14 @@ import re
 import shlex
 import subprocess
 from datetime import datetime
-CMD_SAY = 'sh ../bin/jtalk'
+import threading
+import sched
+import time
 
+CMD_SAY = 'sh ../bin/jtalk'
+WORD_INTERVAL_SEC = 0.00
+
+# Global Audio Function ----->>>
 def sayDatetime():
     # 現在の日付を出力する
     d = datetime.now()
@@ -13,16 +19,17 @@ def sayDatetime():
     return
 
 
-def command(_text):
+def sayCommand(_text):
     try:
         # OpenJTalkを利用するためのシェルコマンドを実行する
-        command = CMD_SAY + ' ' + _text
+        sayCommand = CMD_SAY + ' ' + _text
         # subprocess.check_call()
-        proc = subprocess.Popen(shlex.split(command))
+        proc = subprocess.Popen(shlex.split(sayCommand))
         proc.communicate()
     except:
-        print("audio command error")
+        print("audio sayCommand error")
 
+    print("say com end")
     return
 
 
@@ -43,12 +50,25 @@ def jtalk(_origin):
         text = text.replace('）', '')
         text = text.replace('」', '')
         text = text.replace('』', '')
-        print(text)
-        command(text)
+        #print(text)
 
+        schedule.enter(delay=0, priority=1, action=sayCommand, argument=(text,))
+
+
+def audioSchedule():
+    while 1:
+        #print(schedule.queue)
+        schedule.run() # blocking=True
+        time.sleep(WORD_INTERVAL_SEC)
+
+
+# Audio Thread ----->>>
+schedule = sched.scheduler(timefunc=time.time, delayfunc=time.sleep)
+# 外部から呼び出される時のためのスレッドの作成
+thread = threading.Thread(target=audioSchedule, name="Audio")
+thread.setDaemon(True)
+thread.start()
 
 if __name__ == "__main__":
-    jtalk("ハローおはようございます my master")
     jtalk("ハロー「おは[よう」『ございます｛my master")
 #    sayDatetime()
-

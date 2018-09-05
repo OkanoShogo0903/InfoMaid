@@ -21,8 +21,7 @@ import pprint
 
 #import event_master
 import event_master as event
-import common_function as common
-
+import common_function as common 
 class JuliusController(object):
     def __init__(self):
         # Juliusを起動するためのシェルコマンド
@@ -149,7 +148,8 @@ class JuliusController(object):
                 common.log("コンピュータの再起動を推奨します.")
                 sys.exit(data) # <---プログラムの終了
             else:
-                common.log("Julius active")
+                #common.log("Julius active")
+                pass
 
             #print("julius_socket START ************************************")
             pprint.pprint(data)
@@ -201,8 +201,8 @@ class JuliusController(object):
                         # 言葉を判別してどうこうするコードをここに書く
                         for w in input_word:
                             common.log(w)
-                            event.callSpeachRecog()
-                            event.publishSpeachRecog(w)
+                            #event.callSpeechRecog()
+                            event.publishSpeechRecog(w)
 
                     except ExpatError as err:
                         common.log("ErrorCode    :", errors.messages[err.code])

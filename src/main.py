@@ -8,7 +8,7 @@ import threading
 import random
 import os
 
-#import jtalk
+import jtalk
 #import filer
 import audio
 import senser
@@ -18,6 +18,7 @@ import common_function as common
 import move_julius
 import clock_func
 import weather
+import nlp
 
 #import news as news_file
 

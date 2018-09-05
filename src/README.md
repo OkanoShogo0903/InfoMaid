@@ -13,7 +13,7 @@
 	- イベントを扱うところ
 	[x] event_master
 	- 自然言語処理
-	[ ] 	---> pub
+	[x] nlp ---> pub
 
 - 要素技術(class化する)
 	- Julius
@@ -34,8 +34,8 @@
 
 - other
 [ ] web_search.py
-[ ] AudioQueueの実装(audioとjtalkの親)
-	jtalkはaudioに統合する
+[x] AudioQueueの実装(audioとjtalkの親)
+[ ]	jtalkはaudioに統合する
 [ ] main.pyは<C-c>で落ちるようにして、他のスレッドはすべてデーモンにしてプログラム全体が<C-c>一発で落ちるようにする.
 
 # メモ

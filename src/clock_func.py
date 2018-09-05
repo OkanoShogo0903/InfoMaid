@@ -16,10 +16,10 @@ url_evening     = audio.AUDIO_URL + "other/evening"
 url_morning     = audio.AUDIO_URL + "other/morning"
 url_daytime     = audio.AUDIO_URL + "other/daytime"
 
-def waitSpeechRecog():
+def waitClockEvent():
     while 1:
-        event.speech_recog_event.wait()
-        event.speech_recog_event.clear() # TODO みんなが参照するものをクリアするのはよくなくね???
+        event.clock_event.wait()
+        event.clock_event.clear()
         now = datetime.now()
         timeSignal(now)
 
@@ -106,7 +106,7 @@ def main():
 
 
 # 外部から呼び出される時のためのスレッドの作成
-wait_thread = threading.Thread(target=waitSpeechRecog, name="clock wait")
+wait_thread = threading.Thread(target=waitClockEvent, name="clock wait")
 wait_thread.setDaemon(True)
 wait_thread.start()
 
@@ -115,6 +115,7 @@ t_name = os.path.basename(__file__) + " : clock"
 clock_thread = threading.Thread(target=main, name=t_name)
 clock_thread.setDaemon(True)
 clock_thread.start()
+
 
 if __name__=="__main__":
     time.sleep(10000) # for debug
