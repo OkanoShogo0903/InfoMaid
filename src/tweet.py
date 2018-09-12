@@ -13,6 +13,8 @@ import jtalk
 import re # seiki
 import geophysics
 import json
+import common_function as common
+import event_master as event
 #import random
 #import twitter
 
@@ -31,55 +33,95 @@ import json
     # URLと他人へのメンションとか消す
     # あと広告も消す
 class Tweet:
-    # 初期設定で認証まわりを行う
+    '''
+        ツイッターまわりのことをやります.
+        スレッドを二つ持っており、
+        1つのスレッドは数秒ごとに起きてメンションやタイムラインの監視を行って読み上げます.
+        もう1つのスレッドはcallback関数が呼び出されるとタイムラインを読み上げる等のリアクションをします.
+    '''
     def __init__(self):
-        self.TEXT = ["(tweepyによるbotテスト中)"]
-        # ACCOUT : okanosyogo
-        CK = 'oxzaxjtKBR067gYthawUZVWf1' # Consumer Key
-        CS = 'duuaAVim00LhvM3YMwS2zJHdYHJ2rcCCazsVRrrQCxIoDrr49k' # Consumer Secret
-        AT = '3107659669-tij5gWqxQoZLj12TkU6CZXKqPcxmfSB60ZcOaec' # Access Token
-        AS = 'tKW58iLoAOvU661eukwWPi8BpcCHCMnb5KTGPO7BiIZCJ' # Accesss Token Secert
-        auth = tweepy.OAuthHandler(CK,CS)
-        auth.set_access_token(AT,AS)
-
-        self.api = tweepy.API(auth)
+        # 認証を通しておく.
+        self.setCertification()
 
         # 閾時間の記憶
         latest = self.api.mentions_timeline(count=1)[0]
         self.mention_threshold_time = latest.created_at
         latest = self.api.home_timeline(count=1)[0]
         self.timeline_threshold_time = latest.created_at
-        # スレッドを回しておく
-        t = threading.Timer(1,self.twitter_thread)
-        t.start()
+
+        # タイムラインやメンションの監視スレッドを回しておく
+        threading.Timer(1,self.monitoringLoop).start()
+
+        # 外部から呼び出される時のためのスレッドの作成
+        threading.Thread(\
+                target=self.waitEventCall,\
+                name="TwitterEvent",\
+                daemon=True\
+                ).start()
+
+
+# [Event call back] ----->>>
+    def waitEventCall(self):
+        while 1:
+            event.news_event.wait()
+            event.news_event.clear()
+            self.timeline(_like_favo_threshold = 5, _search_num = 5)
+
+
+# [Init Function] ----->>>
+    def setCertification(self):
+        '''
+            認証まわりを行う.
+            CK,CS,AT,ASをhashしたものを読み込む.
+        '''
+        # Consumer Key
+        CK = 'oxzaxjtKBR067gYthawUZVWf1' 
+        # Consumer Secret
+        CS = 'duuaAVim00LhvM3YMwS2zJHdYHJ2rcCCazsVRrrQCxIoDrr49k' 
+        # Access Token
+        AT = '3107659669-tij5gWqxQoZLj12TkU6CZXKqPcxmfSB60ZcOaec' 
+        # Accesss Token Secert
+        AS = 'tKW58iLoAOvU661eukwWPi8BpcCHCMnb5KTGPO7BiIZCJ' 
+
+        auth = tweepy.OAuthHandler(CK,CS)
+        auth.set_access_token(AT,AS)
+
+        self.api = tweepy.API(auth)
+
     
-#    # 自分のアカウントデータを表示する関数（試作品の意味合い強いです）
-#    def my_account_data(self):
-#        user = self.api.me()
-#        # 自分のid
-#        print(user.id) # 3107659669
-#        # 自分の名前
-#        print(user.name) # キッチン
-#        print(user.screen_name) # okanosyogo
-#        print(user.status.text)
+# [Loop] ----->>>
+    def monitoringLoop(self):
 
-       
-    # ツイッターボット機能
-    def tweet_bot(self):
-        self.api.update_status(status = self.TEXT)
+        '''
+            定期的にメンションとタイムラインを監視するための関数.
+            自身を呼び出すタイマースレッドをセットする.
+        '''
+        MONITORING_TIME = 30
 
-    def word_search(self,_word = "",_count = 10,_lang='ja',_result_type='popular',_address=None,_range=5.0):
-        """ ツイッターの検索機能 """
-        # _word : search _word
-        # _count : search status count
-        # _result_type : recent,popular,mixed
-        # _address : 東京墨田区など町の名前
+        # メンションとタイムラインの関数をそれぞれ呼び出す.
+        self.reactionForMentions()
+        self.timeline(_like_favo_threshold = 5, _search_num = 5)
+
+        # スレッドを回しておく
+        threading.Timer(MONITORING_TIME, self.monitoringLoop).start()
+    
+
+# [Normal Function] ----->>>
+    def searchByWord(self,_word = "",_count = 10,_lang='ja',_result_type='popular',_address=None,_range=5.0):
+        '''
+            ツイッターの検索機能
+            @param:
+                _word : search _word
+                _count : search status count
+                _result_type : recent,popular,mixed
+                _address : 東京墨田区など町の名前
+        '''
 
         # 指定が無いときはreturnする
         if _word == "" and _address == None:return
         # 住所や場所のキーワードが入力されているときは、GoogleMapApiから緯度経度を付与する
         if _address != None:
-            geo_json = geophysics.get_geocode(_address)
+            geo_json = geophysics.getGeocode(_address)
             if geo_json == None:return
             lat = geo_json['results'][0]['geometry']['location']['lat']
             lng = geo_json['results'][0]['geometry']['location']['lng']
@@ -105,11 +147,28 @@ class Tweet:
                 print('TWEET user name : {}'.format(status.user.name))
                 print('TWEET text      : {}'.format(status.text))
                 jtalk.jtalk("{}様より".format(status.user.name))
-                jtalk.jtalk("{}".format(self.format_text(status.text)))
+                jtalk.jtalk("{}".format(self.formatText(status.text)))
 
 
-    def timeline(self , _like_favo_threshold = -1 , _search_num = 5):
-        """ 自分の新しいタイムラインを表示する機能 """
+    def timeline(self , _like_favo_threshold=-1, _search_num=5):
+        '''
+            自分の新しいタイムラインを表示する.
+            @param
+                _like_favo_threshold :
+                    リツイートとファヴォの数の和が引数以上の
+                    場合に反応するようになります.
+                    デフォルトでは引数に-1を設定しており、
+                    _search_num全てのツイートを読み上げます.
+
+                _search_num :
+                    新しいツイートから何個分検索するかを設定します.
+                    古いツイートを読み上げてもしかたがないので、
+                    新しいツイートのみを読み上げます.
+
+            @TODO
+                単にファボとリツイートで閾値をとると、
+                バズったツイートにしか反応しなくなるのでは?
+        '''
         # _like_favo_threshold  : ファボとリツイートを足して[_like_favo_threshold]以上のツイートだけを表示
         # _search_num : 最新[_search_num]件のデータを扱う
         result = self.api.home_timeline()
@@ -135,10 +194,10 @@ class Tweet:
 
                     jtalk.jtalk("タイムラインが更新されました")
                     jtalk.jtalk("{}様より".format(status.user.name))
-                    jtalk.jtalk("{}".format(self.format_text(status.text)))
+                    jtalk.jtalk("{}".format(self.formatText(status.text)))
 
 
-    def reaction_for_mentions(self):
+    def reactionForMentions(self):
         """ 自分に返信があったときに反応して読み上げるスレッド """
         result = self.api.mentions_timeline(count=5)
         for i,status in  enumerate(reversed(result)):
@@ -152,28 +211,20 @@ class Tweet:
                 print('TWEET text      : {}',format(status.text))
 
                 jtalk.jtalk("{}様より、メンションが確認されました".format(status.user.name))
-                jtalk.jtalk("{}".format(self.format_text(status.text)))
+                jtalk.jtalk("{}".format(self.formatText(status.text)))
 
                 #say_text = "メンションが確認されました。"
                 #say_text += status.user.name + "から。"
-                #say_text += self.format_text(status.text)
+                #say_text += self.formatText(status.text)
                 #jtalk.jtalk(say_text) # 最新のmentionを読み上げる
 
 
-    # twitterに関係する関数を回すスレッド
-    def twitter_thread(self):
-#        return
-        self.reaction_for_mentions()
-        self.timeline(_like_favo_threshold = 0, _search_num = 5)
-
-        # スレッドを回しておく
-        t = threading.Timer(30,self.twitter_thread)
-        t.start()
-    
-    def format_text(self,text):
-        # メンションの削除
-        # ＠から始る、任意文字、任意の空白文字まで一個だけ消す
-        # (例：@okanosyogo @handa1123 こんにちわ → @handa1123 こんにちわ)
+    def formatText(self,text):
+        '''
+        メンションの削除
+        ＠から始る、任意文字、任意の空白文字まで一個だけ消す
+        (例：@okanosyogo @handa1123 こんにちわ → @handa1123 こんにちわ)
+        '''
         res = re.sub(r"(@[a-zA-Z0-9_]* )+","",text)
         res = re.sub(r"(@[a-zA-Z0-9_]*:)+","",text)
 #        res = re.sub(r"(?:https?|ftp)://[A-Za-z0-9.-]*","",res)
@@ -182,17 +233,45 @@ class Tweet:
         # TODO URLの削除
         return res
         
+
+# [Not used Function] ----->>>
+    def showMyAccountInfo(self):
+        '''
+            自分のアカウントデータを表示する関数.
+            試作品の意味合い強いです.
+            使われてない.
+        '''
+        user = self.api.me()
+        # 自分のid
+        print(user.id) # 3107659669
+        # 自分の名前
+        print(user.name) # キッチン
+        print(user.screen_name) # okanosyogo
+        print(user.status.text)
+
+       
+    def tweetBot(self):
+        '''
+            定型文のツイッターボット機能.
+            使われてない.
+        '''
+        self.TEXT = ["(tweepyによるbotテスト中)"]
+        self.api.update_status(status = self.TEXT)
+
+
+
+# インスタンスの作成
+tweet = Tweet()
 if __name__=="__main__":
     # twitter スレッドの動作始動
-    tweet = Tweet()
-#    tweet.tweet_bot()
-#    tweet.test_house()
+#    tweet.tweetBot()
+#    tweet.testHouse()
 #    tweet.timeline(_like_favo_threshold = 5, _search_num = 20)
-#    tweet.word_search(_word = "メイドインアビス OR ナナチ",_count = 10)
-#    tweet.word_search(_word = "ナナチ",_address = "東京タワー",_count = 100,_range=10.0)
-#    tweet.word_search(_word = "@okanosyogo AND http",_count = 100)
+#    tweet.searchByWord(_word = "メイドインアビス OR ナナチ",_count = 10)
+#    tweet.searchByWord(_word = "ナナチ",_address = "東京タワー",_count = 100,_range=10.0)
+#    tweet.searchByWord(_word = "@okanosyogo AND http",_count = 100)
 
-    print(tweet.format_text("\
+    print(tweet.formatText("\
             RT @momoco_haru: 第２回 Modernistic Illustration Galleryで「手のひらの踊り子」というイラストが入選・そして優秀賞をいただきました。\
             3/01～3/07まで東京都美術館（上野）にて展示されるそうです。\
             https://t.co/H…\

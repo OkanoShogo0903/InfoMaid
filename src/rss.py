@@ -1,25 +1,29 @@
 import feedparser
 from datetime import datetime
 from time import mktime
-def rss_master():
+def rssMaster():
 # 音声でジャンルを指定したり、ランダムなジャンルからニュースを取得したり、時間帯によって取得するジャンルを変えたりする機能を予定
-    url = serect_rss()
-    get_rss_topic(url)
-def serect_rss():
-    url = ""
-    #RSSのURL
+    url = serectRss()
+    getRssTopic(url)
+
+
+def serectRss():
+    ''' RSSのURLを設定 '''
     url  = "https://news.yahoo.co.jp/pickup/economy/rss.xml"
 #    rss_url  = "http://www.japantoday.com/feed/"
 #    url = "https://headlines.yahoo.co.jp/rss/it_nlab-c_sci.xml"
     return url
-def get_rss_title(rss_url_):
+
+
+def getRssTitle(rss_url_):
     # RSSの取得
     feed = feedparser.parse(rss_url_)
 
     # RSSのタイトル
     return feed.feed.title
 
-def get_rss_topic(rss_url_):
+
+def getRssTopic(rss_url_):
     # RSSの取得
     feed = feedparser.parse(rss_url_)
 
@@ -64,5 +68,6 @@ def get_rss_topic(rss_url_):
     '''    
     return topic_list
 
+
 if __name__=="__main__":
-    rss_master()
+    rssMaster()

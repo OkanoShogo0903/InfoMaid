@@ -38,9 +38,10 @@ class WeatherData:
 
 
     def waitEventCall(self):
-        interval_sec = 60*60*3 # 3時間 ごとに更新
+        TIMEOUT_INTERVAL_SEC = 60*60*3 # 3時間 ごとに更新
         while 1:
-            while not event.weather_event.wait(interval_sec):
+            while not event.weather_event.wait(TIMEOUT_INTERVAL_SEC):
+                # Timeout process.
                 self.getWeatherData()
             event.weather_event.clear()
             self.sayWeather(_say_range=1)
@@ -97,7 +98,7 @@ class WeatherData:
                 # say_textになにかが入っていたら、をつける
                 if say_text:
                     say_text += "、"
-                say_text += data['dateLabel'] + "の天気は"
+                say_text += data['dateLabel'] + "の天気は" + data['telop'] + "で、"
                 try:
                     say_text += "最高気温" + data['temperature']['max']['celsius'] + "度、"
                 except TypeError:

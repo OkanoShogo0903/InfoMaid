@@ -6,7 +6,10 @@ import event_master as event
 import common_function as common
 
 def main():
-    ''' TODO: ここをnlpっぽい処理に書き換える '''
+    '''
+        @TODO :
+            ここをnlpっぽい処理に書き換える
+    '''
     # Voice input Waitting.
     weather = ["てんき"]
     news    = ["にゅーす"]

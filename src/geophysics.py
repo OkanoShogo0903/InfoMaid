@@ -5,7 +5,7 @@
 import requests
 import urllib.parse
 import json
-def get_geocode(address):
+def getGeocode(address):
     sensor = "false"
     url = 'http://maps.google.com/maps/api/geocode/json?'
     
@@ -24,4 +24,4 @@ def get_geocode(address):
     except:
         print("GEOCODE.py ERRER")
         return None
-#get_geocode("野々市住吉")
+#getGeocode("野々市住吉")

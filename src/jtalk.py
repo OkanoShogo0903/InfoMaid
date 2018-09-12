@@ -29,7 +29,6 @@ def sayCommand(_text):
     except:
         print("audio sayCommand error")
 
-    print("say com end")
     return
 
 
@@ -38,10 +37,11 @@ def jtalk(_origin):
 # TODO \『|\{正規化表現で『{でsplitできない？みたい
 
     # 長い文になると言葉が途切れ途切れになるため複数に分けて出力する
-    text_list = re.split(r'\s|\[|\「', _origin)
+    text_list = re.split(r'\s|\[|\「|。', _origin)
 #    text_list = re.split(r'\s|\.', _origin)
     # \s 空白
     # \[ 半角(
+    print(text_list)
     
     for text in text_list:
 #        text = text.replace(' ', '')
@@ -51,8 +51,12 @@ def jtalk(_origin):
         text = text.replace('」', '')
         text = text.replace('』', '')
         #print(text)
-
-        schedule.enter(delay=0, priority=1, action=sayCommand, argument=(text,))
+        if text == '':
+            continue
+        else:
+            # 喋ることリストに登録する.
+            print(text)
+            schedule.enter(delay=0, priority=1, action=sayCommand, argument=(text,))
 
 
 def audioSchedule():

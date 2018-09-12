@@ -1,4 +1,4 @@
-## 何のプログラムか
+## しんちょく
 - main
 [x] main.py
 [x] common_function
@@ -24,19 +24,36 @@
 	- 天気
 	[x] weather.py <--- sub(speech,senser)
 	- ニュース
-	[ ] news.py <--- sub(speech,senser)
-	[ ] beautiful_soup.py
-	[ ] rss.py
-	[ ] site_list.py
+	[x] news.py <--- sub(speech,senser)
+	[x] beautiful_soup.py
+	[x] rss.py
+	[x] site_list.py
 	- ツイッター
 	[ ] tweet.py <--- sub(speech)
-	[ ] geophysics.py
+	[x] geophysics.py
 
-- other
+# やることリスト
 [ ] web_search.py
 [x] AudioQueueの実装(audioとjtalkの親)
 [ ]	jtalkはaudioに統合する
 [ ] main.pyは<C-c>で落ちるようにして、他のスレッドはすべてデーモンにしてプログラム全体が<C-c>一発で落ちるようにする.
+[ ] ニュースの取得をサイトごとにマルチスレッドで並列で処理させて、起動を早くするか？？
+[ ] システムウェイクアップフェイズに以降とか、起動フェイズ開始とか、そんな感じにバラエティーを持たせたい.
+[ ] システム起動中はピロピロ音を鳴らすとかよくない???
+[ ] オルガとか、特殊ワードに反応させたい.
+[ ] 今日の天気しか言わないので、時間によっては明日の天気を言うようにしたい.
 
 # メモ
 - while1で回すと処理が重くなるから、スレッド処理で軽くしてあげたほうがいい？
+- 音声認識中になんか音だす?
+- C-cで落とすときにも音を鳴らす
+- twitterデータのhash化
+
+# err or warning
+- newsからjtalkに送ったところで発生?  
+WARNING: JPCommonLabel_insert_word() in jpcommon_label.c: First mora should not be short pause.
+- julius
+  File "/home/pi/デスクトップ/InfoMaid/src/move_julius.py", line 58, in __del__
+      while self.julius.poll() is None:
+	  AttributeError: 'NoneType' object has no attribute 'poll'
+

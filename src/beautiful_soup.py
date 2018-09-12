@@ -1,20 +1,21 @@
 import requests
 from bs4 import BeautifulSoup
-#news_list
-def news_master():
-    news_url = select_news()
-    get_news_list(news_url)
-#    GetNewsText()
+
+# ほとんどがテストようのコードなので、実際に使われているのはgetNewsTextだけ.
+def newsMaster():
+    news_url = getNewsUrl()
+    getNewsList(news_url)
+    GetNewsText()
 
 
-def select_news():
+def getNewsUrl():
     url = 'https://news.finance.yahoo.co.jp/'
 #    url = 'https://news.yahoo.co.jp/pickup/economy/rss.xml'
 #    url = 'https://rdsig.yahoo.co.jp/rss/l/headlines/sci/it_nlab/RV=1/RU=aHR0cHM6Ly9oZWFkbGluZXMueWFob28uY28uanAvaGw_YT0yMDE3MTEyNC0wMDAwMDA3My1pdF9ubGFiLXNjaQ--'
     return url
 
 
-def get_news_text(url_,pos_):
+def getNewsText(url_,pos_):
     res = requests.get(url_)
     soup = BeautifulSoup(res.text, 'lxml') #要素を抽出
     explains = soup.find_all(pos_[0], {pos_[1]: pos_[2]})
@@ -26,7 +27,7 @@ def get_news_text(url_,pos_):
     return explains[0].text
            
 
-def get_news_list(url_):
+def getNewsList(url_):
     res = requests.get(url_)
 
     # print(res.text)
@@ -56,4 +57,4 @@ def get_news_list(url_):
 
 
 if __name__=="__main__":
-    news_master()
+    newsMaster()
