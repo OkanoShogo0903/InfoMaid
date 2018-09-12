@@ -65,7 +65,7 @@ class Tweet:
         while 1:
             event.news_event.wait()
             event.news_event.clear()
-            self.timeline(_like_favo_threshold = 5, _search_num = 5)
+            self.timeline(_like_favo_threshold = 5, _search_num = 10)
 
 
 # [Init Function] ----->>>

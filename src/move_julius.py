@@ -152,7 +152,7 @@ class JuliusController(object):
                 pass
 
             #print("julius_socket START ************************************")
-            pprint.pprint(data)
+            #pprint.pprint(data)
             #print("julius_socket END   ************************************")
 
             #stdout_data, stderr_data = julius.communicate() # sec
@@ -233,15 +233,18 @@ def main():
                     state = 0
 
         except KeyboardInterrupt:
+            sys.exit(0)
             return
 
 
 #common.thread_create( name=os.path.basename(__file__) + " main", target=main)
 #main()
-t_name = os.path.basename(__file__) + " : Julius"
-thread = threading.Thread(target=main, name=t_name)
-thread.setDaemon(True)
-thread.start()
+threading.Thread(\
+        target=main,\
+        name="Julius",\
+        daemon=True\
+        ).start()
+
 if __name__=="__main__":
     time.sleep(60) # for debug
 

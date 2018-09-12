@@ -89,15 +89,17 @@ def mutter(now):
 
 def main():
     try:
+        # 1分に1回呼び出される.
         while 1:
             now = datetime.now()
 
             if now.minute%10 == 0:
                 timeSignal(now)
             elif random.randint(0,20) == 0:
-                # 60分に一回程度で特殊日時ボイスを出します
+                # 60分に1回程度で特殊日時ボイスを出します.
                 specificTime(now)
-            else:
+            elif random.randint(0,20) == 0:
+                # 60分に1回程度で何かしらつぶやきます.
                 mutter(now)
 
             time.sleep(60)
@@ -105,17 +107,19 @@ def main():
         return
 
 
-# 外部から呼び出される時のためのスレッドの作成
-wait_thread = threading.Thread(target=waitClockEvent, name="clock wait")
-wait_thread.setDaemon(True)
-wait_thread.start()
+# 外部から呼び出される時のためのスレッドの呼び出し
+threading.Thread(\
+        target=waitClockEvent,\
+        name="ClockEvent",\
+        daemon=True\
+        ).start()
 
-# main thread
-t_name = os.path.basename(__file__) + " : clock"
-clock_thread = threading.Thread(target=main, name=t_name)
-clock_thread.setDaemon(True)
-clock_thread.start()
-
+# ClockMainスレッドの呼び出し
+threading.Thread(\
+        target=main,\
+        name="Clock",\
+        daemon=True\
+        ).start()
 
 if __name__=="__main__":
     time.sleep(10000) # for debug
