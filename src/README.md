@@ -53,8 +53,14 @@
 # err or warning
 - newsからjtalkに送ったところで発生?  
 WARNING: JPCommonLabel_insert_word() in jpcommon_label.c: First mora should not be short pause.
+
 - julius
   File "/home/pi/デスクトップ/InfoMaid/src/move_julius.py", line 58, in __del__
       while self.julius.poll() is None:
 	  AttributeError: 'NoneType' object has no attribute 'poll'
+
+- twitter
+	原因はtwitterAPIの仕様変更のため???
+	result = self.api.home_timeline()
+	tweepy.error.RateLimitError: [{'code': 88, 'message': 'Rate limit exceeded'}]
 

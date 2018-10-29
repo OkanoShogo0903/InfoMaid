@@ -96,18 +96,18 @@ class Tweet:
             定期的にメンションとタイムラインを監視するための関数.
             自身を呼び出すタイマースレッドをセットする.
         '''
-        MONITORING_TIME = 30
+        MONITORING_RATE_SEC = 30
 
         # メンションとタイムラインの関数をそれぞれ呼び出す.
         self.reactionForMentions()
         self.timeline(_like_favo_threshold = 5, _search_num = 5)
 
         # スレッドを回しておく
-        threading.Timer(MONITORING_TIME, self.monitoringLoop).start()
+        threading.Timer(MONITORING_RATE_SEC, self.monitoringLoop).start()
     
 
 # [Normal Function] ----->>>
-    def searchByWord(self,_word = "",_count = 10,_lang='ja',_result_type='popular',_address=None,_range=5.0):
+    def searchByWord(self,_word = "", _count = 10, _lang='ja', _result_type='popular',_address=None, _range=5.0):
         '''
             ツイッターの検索機能
             @param:
@@ -115,6 +115,7 @@ class Tweet:
                 _count : search status count
                 _result_type : recent,popular,mixed
                 _address : 東京墨田区など町の名前
+                _range   : 範囲(km)
         '''
 
         # 指定が無いときはreturnする

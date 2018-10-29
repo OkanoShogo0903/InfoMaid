@@ -38,19 +38,21 @@ def jtalk(_origin):
 
     # 長い文になると言葉が途切れ途切れになるため複数に分けて出力する
     text_list = re.split(r'\s|\[|\「|。', _origin)
+    #text_list = re.split(r'[\p{P}]', _origin)
 #    text_list = re.split(r'\s|\.', _origin)
     # \s 空白
     # \[ 半角(
     print(text_list)
     
     for text in text_list:
+        #text = text.replace('[\p{P}]', '') # 約物を対象
 #        text = text.replace(' ', '')
         text = text.replace(')', '')
         text = text.replace('（', '')
         text = text.replace('）', '')
         text = text.replace('」', '')
         text = text.replace('』', '')
-        #print(text)
+        print(text)
         if text == '':
             continue
         else:

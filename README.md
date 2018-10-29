@@ -35,6 +35,11 @@
 ~~~
 $ setxkbmap -option ctrl:nocaps
 ~~~
+* time setting
+~~~
+sudo timedatectl set-timezone Asia/Tokyo
+~~~
+
 * Internet Activate 
 ~~~
 $ vi /etc/dhcpd.conf
