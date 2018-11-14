@@ -29,13 +29,15 @@
 
 * 人感でキッチンにいるときは、ジャズ流してほしい。
 	ただ、自分の音を自分で拾う問題があるので、これはどうしたものか...
+
 ------------
+
 # RaspberryPi SetUp
-* Caps->Ctrl
+* Caps -> Ctrl
 ~~~
 $ setxkbmap -option ctrl:nocaps
 ~~~
-* time setting
+* Time setting
 ~~~
 sudo timedatectl set-timezone Asia/Tokyo
 ~~~
@@ -222,50 +224,79 @@ $ aplay -l
 ~~~
 $ aplay -Dhw:1,0 test.wav
 ~~~
+
+------------
+# Sencer
+## MotionSencer
+[!image](./etcs/image/raspi-numbering.png)
+GPIO17のピン番号は11なので注意  
+
+|vcc|ground|out|
+|:-:|:-:|:-:|
+|  01  |  06  |  11  |
+
+------------
+
 # Julius
 Juliusについての説明・注意事項
-* **ここではv4.3.1をダウンロードしているが、ウェブの情報はv4.2.3が多い。 
-違うヴァージョンの記事では起動すら危ういので注意**
-* **grammar-kit-v4.1 及び julius-4.3.1/gramtools/mkdfa/ に付属している mkdfa.pl（から参照されるmkfa） は正常に動作しないので、julius ディレクトリ内にある対応版の mkfa を利用する必要がある。**
-* Julius4からJulianと統合された。
-* Juliusは言語モデルと音響モデルから最尤を出すエンジンなので、識精度は使用するモデルによって大きく変化する。
-(Juliusが日常会話で認識精度が低いのは、Julius標準のモデルの問題)
-* Julius-4.4より音響モデルでDNN-HMMを使用可能。
-* 言語モデルはNNを未サポート。
-* モジュールモードで動かせばTCP/IPで通信できる。
+- Juliusはフリーの音声認識エンジンで、商業利用可能となっている.
+- 認識率90%と言われているが、Julius標準のモデルを使った日常会話の書き起こしの精度は体感で30%程度.
+- 識精度は使用するモデルによって大きく変化するため、精度を求めるときは言語モデルと音響モデルを差し替えて利用すること.
+- ヴァージョンごとの差が非常に激しい.Juliusは1990年代に生まれた古いソフトウェアなので、古いヴァージョンの情報も多く注意が必要.
+- Julius公式のREADMEの指示通りにやってもエラー吐きます.
+
+## 参考サイト
+- http://usicolog.nomaki.jp/engineering/raspberryPi/raspberryPi_Julius.html
+- https://qiita.com/nanako_ut/items/0b42cb956929a7ac739a
+- https://qiita.com/mininobu/items/609aed76f5767f0aa99b
+- https://qiita.com/satosystems/items/4d379e57d2370177ead1#fnref3
 
 ## Install
-* [Julius](http://julius.osdn.jp/)のソースコードからコンパイル
-~~~
-$ cd
+- [Julius](http://julius.osdn.jp/)のソースコードからコンパイルする.
+この記事では**v4.3.1**を利用している.
+```
 $ wget --trust-server-names 'http://osdn.jp/frs/redir.php?m=iij&f=%2Fjulius%2F60273%2Fjulius-4.3.1.tar.gz'
 $ tar xvzf julius-4.3.1.tar.gz
 $ cd julius-4.3.1/
 $ ./configure
 $ make
 
-#$ sudo make install
-$ vim .bash_profile
-export ALSADEV="plughw:1,0"
-~~~
-* ディクテーションファイル
-~~~
+$ sudo make install
+$ echo "export PATH=$PATH:~/grammar-kit-4.3.1/bin/linux" >> .bash_profile
+$ echo "ALSADEV=\"plughw:1,0\"" >> .bash_profile
+```
+
+- ディクテーションファイル
+```
 $ mkdir ~/julius-kits
 $ cd ~/julius-kits
 $ wget --trust-server-names 'http://osdn.jp/frs/redir.php?m=iij&f=%2Fjulius%2F60416%2Fdictation-kit-v4.3.1-linux.tgz'
 $ tar xvzf dictation-kit-v4.3.1-linux.tgz
-~~~
+```
+
+## Using
+Juliusを動かす方法は主に以下の方法がある.
+- コマンドラインから直接動かす方法
+- モジュールモードで動かし、TCP/IPで認識結果を受け取る方法
+
 * Juliusの実行
 plughw:0,0はマイクのカードとデバイスの番号に合わせる
-~~~
+```
 $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
-~~~
+```
 * 起動時のオプション
 [リファレンス・マニュアル(公式)](https://julius.osdn.jp/juliusbook/ja/julius.html)
 
+## チューニングの方法
+
+
 ## Juliusについてのメモ
-ファイルの役割について  
-Juliusはjulianが後から統合された流れもあってか、ファイル構成が複雑  
+- ウェブの情報はv4.2.3が多い.
+- Julius4からJulianと統合された。そのためかファイル構成は複雑.
+
+- **grammar-kit-v4.1 及び julius-4.3.1/gramtools/mkdfa/ に付属している mkdfa.pl（から参照されるmkfa） は正常に動作しないので、julius ディレクトリ内にある対応版の mkfa を利用する必要がある。**
+
+## ファイルの役割について  
 * grammar-kit-4.3.1
 	文法
 * julius-4.3.1
@@ -280,7 +311,7 @@ Juliusはjulianが後から統合された流れもあってか、ファイル�
 	うまく音声認識をさせたいのならば、話者の性別や癖、喋っている場所が室内であるか屋外であるかなどの音響的特徴を反映した音響モデルが有償で販売されている。  
 	自分で音響モデルを作るためのツールキットにHTKというものがあるが、言語モデル以上に膨大な専門的知識が必要になるのでオススメできない。  
 	* [Kaldi](https://qiita.com/nina_rumor/items/f5aca2aea404a0f19fd1)(カルディ)
-		C++で書かれたツールキット  
+		C++で書かれた音声認識ツールキット  
 		日本語のドキュメントがない  
 		NNを使える音声認識ツールキット。
 	* CSJ
@@ -292,24 +323,17 @@ Juliusはjulianが後から統合された流れもあってか、ファイル�
 	* SRILM
 		N-gram言語モデルの自作ツール。これは公開されており、学校機関なら無償利用できる。
 * [辞書について](http://feijoa.jp/laboratory/raspberrypi/julius442/)
-* コマンド例
-~~~
-動かない
-1. ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/hmm_mono.jconf -gram greeting -nostrip 
 
-書き取りモードで動かす
-1. ALSADEV="plughw:1,0" julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
-no
-
-モジュールモードで動かす(ALSAの指定が後ろだとうまく動作しない)
-1. julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module ALSADEV="plughw:1,0" 
+## 動作のコマンド例
+```
 モジュールモードで動かす
 1. ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module
+
 環境変数を設定済みの時に、モジュールモードで動かす
 1. julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module
 
 本来はcat /proc/asound/modulesでの優先順位を変えるために/etc/modprobe.d/alsa-base.confでusbマイクの設定をコメントアウトするが、ラズパイではalsa-base.confは無いため代わりにexport ALSADEV="plughw:1,0"とかして環境変数を設定して優先順位を変える必要がある
-~~~
+```
 
 恐ろしいことに、-charconv EUC-JP UTF-8をすると内部エラー起こす。どうしろっていうねん。
 
@@ -333,21 +357,6 @@ no
 	* Julius
 	* XML
 	* Socket
-
-## Juliusの評価
-いやこのコンパイラはいかれてるでしょ。
-READMEの指示通りにやってもエラー吐きます。
-README読んだじゃん！README読んだじゃん！
-
-------------
-# Sencer
-## MotionSencer
-[!image](./etcs/image/raspi-numbering.png)
-GPIO17のピン番号は11なので注意  
-
-|vcc|ground|out|
-|:-:|:-:|:-:|
-|  01  |  06  |  11  |
 
 ------------
 # Using

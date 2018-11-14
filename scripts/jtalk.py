@@ -37,27 +37,34 @@ def jtalk(_origin):
 # TODO \『|\{正規化表現で『{でsplitできない？みたい
 
     # 長い文になると言葉が途切れ途切れになるため複数に分けて出力する
+    #text_list = re.split(r'\s|\[|\「|。', _origin)
     text_list = re.split(r'\s|\[|\「|。', _origin)
-    #text_list = re.split(r'[\p{P}]', _origin)
+    #text_list = re.split('[\p{P}]', _origin)
 #    text_list = re.split(r'\s|\.', _origin)
     # \s 空白
     # \[ 半角(
-    print(text_list)
+    print("text_list", text_list)
     
     for text in text_list:
-        #text = text.replace('[\p{P}]', '') # 約物を対象
+        #text = text.replace(r'[\p{P}]', '') # 約物を対象
 #        text = text.replace(' ', '')
-        text = text.replace(')', '')
-        text = text.replace('（', '')
-        text = text.replace('）', '')
-        text = text.replace('」', '')
-        text = text.replace('』', '')
+        #text = text.replace(')', '')
+        #text = text.replace('（', '')
+        #text = text.replace('）', '')
+        #text = text.replace('」', '')
+        #text = text.replace('』', '')
+        text = text.replace(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "")
+        text = text.replace('RT', "")
+        text = text.replace(r'[!-~]', "")#半角記号,数字,英字
+        text = text.replace(r'[︰-＠]', "")#全角記号
+        text = text.replace('\n', " ")#改行文字
+
         print(text)
         if text == '':
             continue
         else:
             # 喋ることリストに登録する.
-            print(text)
+            print("sayCommand :", text)
             schedule.enter(delay=0, priority=1, action=sayCommand, argument=(text,))
 
 
