@@ -62,7 +62,7 @@ class MotionSencer():
 
         # スレッドのセット
         #t_name = os.path.basename(__file__) + " : Sencer"
-        t = threading.Timer(self.SAMPLING_SEC,self.manageSencerThread) # (第一引数)秒毎でサンプリング
+        t = threading.Timer(self.SAMPLING_SEC, self.manageSencerThread) # (第一引数)秒毎でサンプリング
         t.setDaemon(True)
         t.start()
 
@@ -107,17 +107,17 @@ class MotionSencer():
         if status == Status.sleep:
             if motion_rate_short >= 0.4: # 朝起きたと判断する条件
                 status = Status.home
-                event.callOwnerWake() # --------> Event call!!
+                event.callOwnerStateWake() # --------> Event call!!
 
         elif status == Status.home:
             if motion_rate_long <= 0.05: # 外出したと判断する条件
                 status = Status.leave
-                event.callOwnerGoOut() # --------> Event call!!
+                event.callOwnerStateGoOut() # --------> Event call!!
 
         elif status == Status.leave:
             if motion_rate_short >= 0.2: # 帰ってきたと判断する条件
                 status = Status.home
-                event.callOwnerReturnHome() # --------> Event call!!
+                event.callOwnerStateReturnHome() # --------> Event call!!
         else: # ステータスが変わらないことを明記しておく
             pass
 

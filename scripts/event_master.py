@@ -15,24 +15,24 @@ return_home_event   = Event()
 # other event --->
 weather_event       = Event()
 news_event          = Event()
-clock_event          = Event()
+clock_event         = Event()
 twitter_event       = Event()
 
 # Queue --->
 speech_queue = queue.Queue()
 
 # Sencer Event-------------->>>
-def callOwnerWake():
+def callOwnerStateWake():
     common.log(sys._getframe().f_code.co_name)
     wake_event.set()
 
 
-def callOwnerGoOut():
+def callOwnerStateGoOut():
     common.log(sys._getframe().f_code.co_name)
     go_out_event.set()
 
 
-def callOwnerReturnHome():
+def callOwnerStateReturnHome():
     common.log(sys._getframe().f_code.co_name)
     return_home_event.set()
 

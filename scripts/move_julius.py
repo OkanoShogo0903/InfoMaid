@@ -33,7 +33,48 @@ class JuliusController(object):
 
         #self.args = 'ALSADEV=\"plughw:0,0\" julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict_sjis/greeting -nostrip -module -charconv SJIS UTF-8 '
         #self.args = 'ALSADEV=\"plughw:0,0\" julius -C ~/grammar-kit-4.3.1/testmic.jconf -nostrip -module -charconv SJIS UTF-8 '
-        self.args = 'ALSADEV=\"plughw:0,0\" julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/d.jconf -nostrip -module'
+        #self.args = 'ALSADEV=\"plughw:0,0\" julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/d.jconf -nostrip -module'
+
+        device = 'ALSADEV=\"plughw:0,0\"'
+        julius_path = "julius"
+        origin_options = "\
+                -d     ~/julius-kits/dictation-kit-v4.3.1-linux/model/lang_m/bccwj.60k.bingram\
+                -v     ~/julius-kits/dictation-kit-v4.3.1-linux/model/lang_m/bccwj.60k.htkdic\
+                -h     ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/jnas-tri-3k16-gid.binhmm\
+                -hlist ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/logicalTri\
+                -lmp 8.0 -2.0\
+                -lmp2 8.0 -2.0\
+                -b 1500\
+                -b2 100\
+                -s 500\
+                -m 10000\
+                -n 30\
+                -output 1\
+                -zmeanframe\
+                -rejectshort 200\
+                -input mic\
+                -module\
+                "
+        #dictation_options = "\
+        #        -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf\
+        #        -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf\
+        #        -module\
+        #        "
+        dict_options = "\
+                -w     ~/julius-kits/dictation-kit-v4.3.1-linux/d.dic\
+                -v     ~/julius-kits/dictation-kit-v4.3.1-linux/model/lang_m/bccwj.60k.htkdic\
+                -h     ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/jnas-tri-3k16-gid.binhmm\
+                -hlist ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/logicalTri\
+                -n 5\
+                -input mic\
+                -zmeanframe\
+                -charconv euc-jp utf8 \
+                -nostrip\
+                -module\
+                "
+        self.args = device + ' ' + julius_path + ' '
+        self.args += origin_options
+        #self.args += dict_options
 
         self.BUFSIZE = 4096
         self.julius = None
@@ -100,6 +141,7 @@ class JuliusController(object):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
+            time.sleep(3) # <--- Important!!!
             # TCPサーバー接続の初期化
             s.connect(('localhost', 10500))
         except:
@@ -107,7 +149,7 @@ class JuliusController(object):
             import traceback
             traceback.print_exc()
 
-            stdout_data, stderr_data = julius.communicate(timeout=2) # sec
+            stdout_data, stderr_data = julius.communicate(timeout=5) # sec
             print("communicate out : ",stdout_data)
             print("communicate err : ",stderr_data)
 

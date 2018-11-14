@@ -284,17 +284,20 @@ plughw:0,0はマイクのカードとデバイスの番号に合わせる
 ```
 $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
 ```
+
 * 起動時のオプション
 [リファレンス・マニュアル(公式)](https://julius.osdn.jp/juliusbook/ja/julius.html)
 
-## チューニングの方法
-
+## 辞書のチューニングの方法
+[このサイト](https://qiita.com/mininobu/items/322a49856e6665bc8a30)を参照.  
+.jconfファイルはオプションとしてつける引数をつらつら書くのが面倒だからそれらをまとめたmakefile的な存在.
+.dfa, .dictは文法ファイルと呼ばれる.
 
 ## Juliusについてのメモ
 - ウェブの情報はv4.2.3が多い.
 - Julius4からJulianと統合された。そのためかファイル構成は複雑.
 
-- **grammar-kit-v4.1 及び julius-4.3.1/gramtools/mkdfa/ に付属している mkdfa.pl（から参照されるmkfa） は正常に動作しないので、julius ディレクトリ内にある対応版の mkfa を利用する必要がある。**
+- **辞書を作るときに利用するmkdfa.plだが、grammar-kit-v4.1 及び julius-4.3.1/gramtools/mkdfa/ に付属している mkdfa.pl（から参照されるmkfa） は正常に動作しないので、julius ディレクトリ内にある対応版の mkfa を利用する必要がある。**
 
 ## ファイルの役割について  
 * grammar-kit-4.3.1
@@ -335,7 +338,8 @@ $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-k
 本来はcat /proc/asound/modulesでの優先順位を変えるために/etc/modprobe.d/alsa-base.confでusbマイクの設定をコメントアウトするが、ラズパイではalsa-base.confは無いため代わりにexport ALSADEV="plughw:1,0"とかして環境変数を設定して優先順位を変える必要がある
 ```
 
-恐ろしいことに、-charconv EUC-JP UTF-8をすると内部エラー起こす。どうしろっていうねん。
+- 恐ろしいことに、-charconv EUC-JP UTF-8をすると内部エラー起こす。どうしろっていうねん。
+- moduleモードで動かしたときは、socket通信してすぐにjuliusに応答を求めてもjuliusが使っているモデルによっては立ち上がりに時間がかかるため、エラーを起こす.
 
   目標と方針
 1. UCとバジリスクとアメリカのディスコっぽい曲をかける
