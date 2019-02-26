@@ -74,17 +74,15 @@ class Tweet:
             認証まわりを行う.
             CK,CS,AT,ASをhashしたものを読み込む.
         '''
-        # Consumer Key
-        CK = 'oxzaxjtKBR067gYthawUZVWf1' 
-        # Consumer Secret
-        CS = 'duuaAVim00LhvM3YMwS2zJHdYHJ2rcCCazsVRrrQCxIoDrr49k' 
-        # Access Token
-        AT = '3107659669-tij5gWqxQoZLj12TkU6CZXKqPcxmfSB60ZcOaec' 
-        # Accesss Token Secert
-        AS = 'tKW58iLoAOvU661eukwWPi8BpcCHCMnb5KTGPO7BiIZCJ' 
+        import json
+        try:
+            f = open('certification.json', 'r')
+            cdict = json.load(f)
+        except:
+            raise("cannot load \'certification.json\' in scripts dir!!!")
 
-        auth = tweepy.OAuthHandler(CK,CS)
-        auth.set_access_token(AT,AS)
+        auth = tweepy.OAuthHandler(cdict["CK"],cdict["CS"])
+        auth.set_access_token(cdict["AT"],cdict["AS"])
 
         self.api = tweepy.API(auth)
 

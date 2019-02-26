@@ -4,11 +4,9 @@
 * 天気やニュース情報の提供
 * SNSのメンションやタイムラインの通知及び読み上げ
 * 朝起こしてくれる
-* 独り言をしゃべる
-* ワードについて検索する
-とかそんな感じの機能いろいろ
-
-あと、メモとしてdoc.mdにも少し書いてある
+* 独り言機能
+* ワード検索機能
+とか
 
 ## TODO 
 * 音声が重なって再生される問題を解決する。mutexとかsubprocessの機能とかを探す。ボイロとは別件。  
@@ -226,6 +224,13 @@ $ aplay -Dhw:1,0 test.wav
 ~~~
 
 ------------
+
+# Twitter
+certification.jsonをscriptsファイルの中に作る(!?)
+sample_certification.jsonを参考にして
+
+------------
+
 # Sencer
 ## MotionSencer
 [!image](./etcs/image/raspi-numbering.png)
@@ -279,7 +284,7 @@ Juliusを動かす方法は主に以下の方法がある.
 - コマンドラインから直接動かす方法
 - モジュールモードで動かし、TCP/IPで認識結果を受け取る方法
 
-* Juliusの実行
+* コマンドラインでのJuliusの実行例
 plughw:0,0はマイクのカードとデバイスの番号に合わせる
 ```
 $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf -nostrip
@@ -288,16 +293,30 @@ $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-k
 * 起動時のオプション
 [リファレンス・マニュアル(公式)](https://julius.osdn.jp/juliusbook/ja/julius.html)
 
-## 辞書のチューニングの方法
+## 辞書のチューニング方法
 [このサイト](https://qiita.com/mininobu/items/322a49856e6665bc8a30)を参照.  
-.jconfファイルはオプションとしてつける引数をつらつら書くのが面倒だからそれらをまとめたmakefile的な存在.
-.dfa, .dictは文法ファイルと呼ばれる.
+
+以下のサンプルコマンドは、d.yomiからyomi2voca.plを使ってホームディレクトリ直下にd.phoneを生成する.
+```
+$ iconv -f utf8 -t eucjp ~/dict_maid/d.yomi | ~/julius-4.3.1/gramtools/yomi2voca/yomi2voca.pl | iconv -f eucjp -t utf8 > ~/d.phone
+```
+正規の手法ではこれをdictにしていくが、面倒なのでここで作られた\*.phoneを以下のように加工してdictファイルとして利用するのが楽.
+この時、dictファイルのファイルタイプがeuc-jpにしておくことが重要.
+```
+じかん	j i k a N
+てんき	t e N k i
+にゅーす	ny u: s u
+```
 
 ## Juliusについてのメモ
 - ウェブの情報はv4.2.3が多い.
 - Julius4からJulianと統合された。そのためかファイル構成は複雑.
 
 - **辞書を作るときに利用するmkdfa.plだが、grammar-kit-v4.1 及び julius-4.3.1/gramtools/mkdfa/ に付属している mkdfa.pl（から参照されるmkfa） は正常に動作しないので、julius ディレクトリ内にある対応版の mkfa を利用する必要がある。**
+
+- moduleモードで動かしたときは、socket通信してすぐにjuliusに応答を求めてもjuliusが使っているモデルによっては立ち上がりに時間がかかるためエラーを起こす.
+- .jconfファイルはオプションとしてつける引数をつらつら書くのが面倒だからそれらをまとめたmakefile的な存在.
+- .dfa, .dictは文法ファイルと呼ばれる.
 
 ## ファイルの役割について  
 * grammar-kit-4.3.1
@@ -306,8 +325,8 @@ $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-k
 	julius本体、ソースコードからコンパイルしたもの
 * julius-kits --- dictation-kit-v4.3.1-linux
 	音声認識用モデル
-* *.grammar : 文法規則  
-* *.voca : 語彙辞書  
+* \*.grammar : 文法規則  
+* \*.voca : 語彙辞書  
 
 * 音響モデル
 	HMM(隠れ,マルコフ,モデル)が主流で、JuliusでもHMMに対応している。  
@@ -327,88 +346,12 @@ $ ALSADEV="plughw:0,0" ~/julius-4.3.1/julius/julius -C ~/julius-kits/dictation-k
 		N-gram言語モデルの自作ツール。これは公開されており、学校機関なら無償利用できる。
 * [辞書について](http://feijoa.jp/laboratory/raspberrypi/julius442/)
 
-## 動作のコマンド例
-```
-モジュールモードで動かす
-1. ALSADEV="plughw:1,0" julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module
-
-環境変数を設定済みの時に、モジュールモードで動かす
-1. julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module
-
-本来はcat /proc/asound/modulesでの優先順位を変えるために/etc/modprobe.d/alsa-base.confでusbマイクの設定をコメントアウトするが、ラズパイではalsa-base.confは無いため代わりにexport ALSADEV="plughw:1,0"とかして環境変数を設定して優先順位を変える必要がある
-```
-
-- 恐ろしいことに、-charconv EUC-JP UTF-8をすると内部エラー起こす。どうしろっていうねん。
-- moduleモードで動かしたときは、socket通信してすぐにjuliusに応答を求めてもjuliusが使っているモデルによっては立ち上がりに時間がかかるため、エラーを起こす.
-
-  目標と方針
-1. UCとバジリスクとアメリカのディスコっぽい曲をかける
-	0. 辞書登録
-	1. xmlのパース
-	1. EUC-JPの文字化けを直す
-	1. 音声の入手
-	1. 音声を流す処理
-2. プログラムからjuliusの起動と終了をシェルコマンドで操作する
-	2. ALSAのデバイス設定コマンドがなくても動くようにする
-	2. jconfの設定ファイルを参照してjuliusが動くようにする(https://qiita.com/kouichirou/items/5e9f80f46f6137d2926b)
-	2. プログラムを書く
-
-* なぜこんなにもJuliusまわりはつらいのか
-	まずJuliusが分からない。ヴァージョンの問題があるため、web資料が信用できない。
-	xmlのパース方法が分からない。
-	ソケット間通信が分からない。ここにもヴァージョンの壁？
-	UTF-8に直さないと。
-	* Julius
-	* XML
-	* Socket
 
 ------------
+
 # Using
 anacondaいれて、maid.yamlから環境をつくる
-source activate maid
-python main
-
-# hot memo
-~/julius-kits/dictation-kit-v4.3.1-linux 
 ```
-"WHYPO": {
-"@WORD": "\u3058\u304b\u3093",
-"@CLASSID": "\u3058\u304b\u3093",
-"@PHONE": "silB j i k a N silE",
-"@CM": "0.980"
-}
-
+$ source activate maid
+$ python main
 ```
-
-
-```
-
-"WHYPO": [
-{
-"@WORD": "[s]",
-"@CLASSID": "7",
-"@PHONE": "silB",
-"@CM": "1.000"
-},
-{
-"@WORD": "\u871c\u67d1",
-"@CLASSID": "0",
-"@PHONE": "m i k a N",
-"@CM": "1.000"
-},
-{
-"@WORD": "\u3067\u3059",
-"@CLASSID": "6",
-"@PHONE": "d e s u",
-"@CM": "1.000"
-},
-{
-"@WORD": "[/s]",
-"@CLASSID": "8",
-"@PHONE": "silE",
-"@CM": "1.000"
-}
-]
-
-```
-

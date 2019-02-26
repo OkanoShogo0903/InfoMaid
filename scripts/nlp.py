@@ -7,7 +7,7 @@ import common_function as common
 
 def main():
     '''
-        @TODO :
+        TODO :
             ここをnlpっぽい処理に書き換える
     '''
     # Voice input Waitting.
@@ -15,6 +15,10 @@ def main():
     news    = ["にゅーす"]
     clock   = ["じかん","たいむ"]
     twitter = ["ついったー"]
+
+    search  = ["さーち", "しらべ", "けんさく"]
+    oruga   = ["おるが"]
+    sonotamenokobusi = ["まだ", "くらいまっくす", "うぇいく"]
 
     while 1:
         # subscribe is blocking.
@@ -28,7 +32,10 @@ def main():
             event.callClock()
         elif word in twitter:
             event.callTwitter()
-
+        elif word in oruga:
+            event.callOruga()
+        elif word in sonotamenokobusi:
+            event.callKobusi()
 
 thread = threading.Thread(target=main, name="nlp")
 thread.setDaemon(True)

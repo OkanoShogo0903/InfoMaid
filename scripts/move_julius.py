@@ -22,59 +22,14 @@ import pprint
 #import event_master
 import event_master as event
 import common_function as common 
-class JuliusController(object):
-    def __init__(self):
+
+class Julius(object):
+    def __init__(self, option):
         # Juliusを起動するためのシェルコマンド
         #args = r'ALSADEV=\"plughw:1,0\" /usr/local/bin/julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module'
-        #args = r'/usr/local/bin/julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module'
-        #args = 'julius -C ~/grammar-kit-4.3.1/testmic.jconf -nostrip -module' # 辞書なし版
-        #args = 'ALSADEV=\"plughw:0,0\" julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict/greeting -nostrip -module' # 環境変数設定版
-        #args = 'ALSADEV=\"plughw:0,0\" julius -C ~/grammar-kit-4.3.1/testmic.jconf -nostrip -module -charconv SJIS UTF-8 '
-
-        #self.args = 'ALSADEV=\"plughw:0,0\" julius -C ~/grammar-kit-4.3.1/testmic.jconf -gram ~/dict_sjis/greeting -nostrip -module -charconv SJIS UTF-8 '
-        #self.args = 'ALSADEV=\"plughw:0,0\" julius -C ~/grammar-kit-4.3.1/testmic.jconf -nostrip -module -charconv SJIS UTF-8 '
-        #self.args = 'ALSADEV=\"plughw:0,0\" julius -C ~/julius-kits/dictation-kit-v4.3.1-linux/d.jconf -nostrip -module'
-
         device = 'ALSADEV=\"plughw:0,0\"'
         julius_path = "julius"
-        origin_options = "\
-                -d     ~/julius-kits/dictation-kit-v4.3.1-linux/model/lang_m/bccwj.60k.bingram\
-                -v     ~/julius-kits/dictation-kit-v4.3.1-linux/model/lang_m/bccwj.60k.htkdic\
-                -h     ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/jnas-tri-3k16-gid.binhmm\
-                -hlist ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/logicalTri\
-                -lmp 8.0 -2.0\
-                -lmp2 8.0 -2.0\
-                -b 1500\
-                -b2 100\
-                -s 500\
-                -m 10000\
-                -n 30\
-                -output 1\
-                -zmeanframe\
-                -rejectshort 200\
-                -input mic\
-                -module\
-                "
-        #dictation_options = "\
-        #        -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf\
-        #        -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf\
-        #        -module\
-        #        "
-        dict_options = "\
-                -w     ~/julius-kits/dictation-kit-v4.3.1-linux/d.dic\
-                -v     ~/julius-kits/dictation-kit-v4.3.1-linux/model/lang_m/bccwj.60k.htkdic\
-                -h     ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/jnas-tri-3k16-gid.binhmm\
-                -hlist ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/logicalTri\
-                -n 5\
-                -input mic\
-                -zmeanframe\
-                -charconv euc-jp utf8 \
-                -nostrip\
-                -module\
-                "
-        self.args = device + ' ' + julius_path + ' '
-        self.args += origin_options
-        #self.args += dict_options
+        self.args = device + ' ' + julius_path + ' ' + option
 
         self.BUFSIZE = 4096
         self.julius = None
@@ -258,8 +213,54 @@ class JuliusController(object):
                     pass # 録音が一段落するまではなにも処理しないことを明示
 
 
+class JuliusControllerDailyWord(Julius):
+    options = "\
+            -d     ~/julius-kits/dictation-kit-v4.3.1-linux/model/lang_m/bccwj.60k.bingram\
+            -v     ~/julius-kits/dictation-kit-v4.3.1-linux/model/lang_m/bccwj.60k.htkdic\
+            -h     ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/jnas-tri-3k16-gid.binhmm\
+            -hlist ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/logicalTri\
+            -lmp 8.0 -2.0\
+            -lmp2 8.0 -2.0\
+            -b 1500\
+            -b2 100\
+            -s 500\
+            -m 10000\
+            -n 30\
+            -output 1\
+            -zmeanframe\
+            -rejectshort 200\
+            -input mic\
+            -module\
+            "
+    def __init__(self):
+        super().__init__(self.options)
+        #dictation_options = "\
+        #        -C ~/julius-kits/dictation-kit-v4.3.1-linux/main.jconf\
+        #        -C ~/julius-kits/dictation-kit-v4.3.1-linux/am-gmm.jconf\
+        #        -module\
+        #        "
+
+
+class JuliusControllerDictation(Julius):
+    options = "\
+            -w     ~/julius-kits/dictation-kit-v4.3.1-linux/d.dic\
+            -v     ~/julius-kits/dictation-kit-v4.3.1-linux/model/lang_m/bccwj.60k.htkdic\
+            -h     ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/jnas-tri-3k16-gid.binhmm\
+            -hlist ~/julius-kits/dictation-kit-v4.3.1-linux/model/phone_m/logicalTri\
+            -n 5\
+            -input mic\
+            -zmeanframe\
+            -charconv euc-jp utf8 \
+            -nostrip\
+            -module\
+            "
+    def __init__(self):
+        super().__init__(self.options)
+
+
 def main():
-    with JuliusController() as julius_controll:
+    with JuliusControllerDictation() as julius_controll:
+    #with JuliusControllerDailyWord() as julius_controll:
         try:
             state = 0
             while True:

@@ -17,6 +17,8 @@ weather_event       = Event()
 news_event          = Event()
 clock_event         = Event()
 twitter_event       = Event()
+oruga_event       = Event()
+kobusi_event       = Event()
 
 # Queue --->
 speech_queue = queue.Queue()
@@ -53,6 +55,22 @@ def callNews():
 def callClock():
     common.log(sys._getframe().f_code.co_name)
     clock_event.set()
+
+
+# Search Event-------------->>>
+#def callSearch():
+#    common.log(sys._getframe().f_code.co_name)
+#    clock_event.set()
+
+# Special Event-------------->>>
+def callOruga():
+    common.log(sys._getframe().f_code.co_name)
+    oruga_event.set()
+
+
+def callKobusi():
+    common.log(sys._getframe().f_code.co_name)
+    kobusi_event.set()
 
 
 # Twitter Event-------------->>>
