@@ -255,6 +255,8 @@ Juliusについての説明・注意事項
 - https://qiita.com/nanako_ut/items/0b42cb956929a7ac739a
 - https://qiita.com/mininobu/items/609aed76f5767f0aa99b
 - https://qiita.com/satosystems/items/4d379e57d2370177ead1#fnref3
+- https://fromopernring.blogspot.com/2016/05/juliusxmlpython.html
+- http://julius.osdn.jp/juliusbook/ja/desc_module.html
 
 ## Install
 - [Julius](http://julius.osdn.jp/)のソースコードからコンパイルする.
